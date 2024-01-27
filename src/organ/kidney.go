@@ -22,7 +22,7 @@ var _ control.MonitorableController = (*Kidney)(nil)
 func ConstructKidney(name string, consumer circulation.BloodConsumer) *Kidney {
 	return &Kidney{
 		name:        name,
-		vascularity: NewVascularity(VascularityRating3, &metabolism.OxygenMetaboliser{}),
+		vascularity: NewVascularity(VascularityRating3, &metabolism.OxygenConsumer{}),
 		consumer:    consumer,
 	}
 }
@@ -42,7 +42,9 @@ func (b *Kidney) Act() {
 // Monitor implements control.Controller
 func (v *Kidney) Monitor() *control.BloodStatistics {
 	return &control.BloodStatistics{
-		ComponentName: v.name,
-		BloodQuantity: v.vascularity.BloodQuantity(),
+		ComponentName:       v.name,
+		BloodQuantity:       v.vascularity.BloodQuantity(),
+		HasOxygenSaturation: true,
+		OxygenSaturation:    v.vascularity.OxygenSaturation(),
 	}
 }

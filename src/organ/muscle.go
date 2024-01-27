@@ -17,7 +17,7 @@ var _ control.Controller = (*Muscle)(nil)
 
 func ConstructMuscle(consumer circulation.BloodConsumer) *Muscle {
 	return &Muscle{
-		vascularity: NewVascularity(VascularityRating4, &metabolism.OxygenMetaboliser{}),
+		vascularity: NewVascularity(VascularityRating4, &metabolism.OxygenConsumer{}),
 		consumer:    consumer,
 	}
 }

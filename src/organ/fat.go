@@ -17,7 +17,7 @@ var _ control.Controller = (*Fat)(nil)
 
 func ConstructFat(consumer circulation.BloodConsumer) *Fat {
 	return &Fat{
-		vascularity: NewVascularity(VascularityRating1, &metabolism.OxygenMetaboliser{}),
+		vascularity: NewVascularity(VascularityRating1, &metabolism.OxygenConsumer{}),
 		consumer:    consumer,
 	}
 }

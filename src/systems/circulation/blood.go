@@ -2,7 +2,8 @@ package circulation
 
 type Blood struct {
 	// contains everything in a blood
-	Quantity float64
+	Quantity         float64
+	OxygenSaturation float64
 }
 
 // Extract removes a given fraction of blood in the system.
@@ -12,19 +13,30 @@ func (b *Blood) Extract(fraction float64) Blood {
 	b.Quantity -= qty
 
 	return Blood{
-		Quantity: qty,
+		Quantity:         qty,
+		OxygenSaturation: b.OxygenSaturation,
 	}
 }
 
 // Merge merges the given two Blood objects
 func (b *Blood) Merge(a Blood) {
-	b.Quantity += a.Quantity
+	total := b.Quantity + a.Quantity
+	bFraction := b.Quantity / total
+	oxygenSat := (b.OxygenSaturation * bFraction) + (a.OxygenSaturation * (1 - bFraction))
+
+	b.Quantity = total
+	if total == 0 {
+		b.OxygenSaturation = 0
+	} else {
+		b.OxygenSaturation = oxygenSat
+	}
 }
 
 // RemoveFrom removes the given fraction's worth of blood from input.
-func RemoveFrom(a Blood, fraction float64) Blood {
-	qty := a.Quantity * fraction
+func RemoveFrom(b Blood, fraction float64) Blood {
+	qty := b.Quantity * fraction
 	return Blood{
-		Quantity: qty,
+		Quantity:         qty,
+		OxygenSaturation: b.OxygenSaturation,
 	}
 }

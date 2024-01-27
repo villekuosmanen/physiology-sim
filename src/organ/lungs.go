@@ -17,8 +17,13 @@ var _ control.MonitorableController = (*Lungs)(nil)
 
 func ConstructLungs(consumer circulation.BloodConsumer) *Lungs {
 	return &Lungs{
-		vascularity: NewVascularity(VascularityRating3, &metabolism.OxygenMetaboliser{}),
-		consumer:    consumer,
+		vascularity: NewVascularity(
+			VascularityRating3,
+			&metabolism.OxygenProducer{
+				RateFactor: 0.02,
+			},
+		),
+		consumer: consumer,
 	}
 }
 

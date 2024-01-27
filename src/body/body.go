@@ -234,6 +234,20 @@ func (b *Body) Run(frequency float64, realtime bool, sigs <-chan os.Signal) {
 		t = time.NewTicker(time.Second / (time.Duration(frequency) * 100))
 	}
 
+	// Before we start printing stats, converge by running 1,000,000 runs
+	fmt.Println("Starting simulation...")
+	for i := 0; i < 1_000_000; i++ {
+		if untilNextHeartbeat <= 0 {
+			b.Heart.Beat()
+			untilNextHeartbeat = heartRateFreq
+		} else {
+			untilNextHeartbeat -= 1
+		}
+
+		b.Act()
+		i++
+	}
+
 	for {
 		select {
 		case <-t.C:

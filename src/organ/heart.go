@@ -30,13 +30,15 @@ func ConstructHeart() *Heart {
 	leftVentricle := ventricle{
 		// artery to be set below
 		Blood: &circulation.Blood{
-			Quantity: 50,
+			Quantity:         50,
+			OxygenSaturation: 0.9,
 		},
 	}
 	rightVentricle := ventricle{
 		// artery to be set below
 		Blood: &circulation.Blood{
-			Quantity: 50,
+			Quantity:         50,
+			OxygenSaturation: 0.9,
 		},
 	}
 
@@ -89,12 +91,16 @@ func (h *Heart) MonitorHeart() []*control.BloodStatistics {
 	stats := []*control.BloodStatistics{}
 
 	stats = append(stats, &control.BloodStatistics{
-		ComponentName: "Heart (left atrium)",
-		BloodQuantity: h.LeftAtrium.Blood.Quantity,
+		ComponentName:       "Heart (left atrium)",
+		BloodQuantity:       h.LeftAtrium.Blood.Quantity,
+		HasOxygenSaturation: true,
+		OxygenSaturation:    h.LeftAtrium.Blood.OxygenSaturation,
 	})
 	stats = append(stats, &control.BloodStatistics{
-		ComponentName: "Heart (right atrium)",
-		BloodQuantity: h.RightAtrium.Blood.Quantity,
+		ComponentName:       "Heart (right atrium)",
+		BloodQuantity:       h.RightAtrium.Blood.Quantity,
+		HasOxygenSaturation: true,
+		OxygenSaturation:    h.RightAtrium.Blood.OxygenSaturation,
 	})
 	stats = append(stats, &control.BloodStatistics{
 		ComponentName: "Heart (left ventricle)",

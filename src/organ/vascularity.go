@@ -69,3 +69,7 @@ func (v *Vascularity) BloodQuantity() float64 {
 
 	return qty
 }
+
+func (v *Vascularity) OxygenSaturation() float64 {
+	return v.Gates[len(v.Gates)-1].blood.OxygenSaturation
+}
