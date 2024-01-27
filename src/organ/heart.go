@@ -14,17 +14,23 @@ type Heart struct {
 	leftVentricle  ventricle // to systemic
 }
 
-func ConstructHeart(aorta, pulmonaryArtery circulation.BloodConsumer) *Heart {
-	rightAtrium := atrium{}
+func ConstructHeart() *Heart {
 	leftAtrium := atrium{}
+	rightAtrium := atrium{}
 
 	myocardium := ConstructMuscle(&rightAtrium)
 
-	rightVentricle := ventricle{
-		Artery: pulmonaryArtery,
-	}
 	leftVentricle := ventricle{
-		Artery: aorta,
+		// artery to be set below
+		Blood: &circulation.Blood{
+			Quantity: 50,
+		},
+	}
+	rightVentricle := ventricle{
+		// artery to be set below
+		Blood: &circulation.Blood{
+			Quantity: 50,
+		},
 	}
 
 	return &Heart{
@@ -34,6 +40,11 @@ func ConstructHeart(aorta, pulmonaryArtery circulation.BloodConsumer) *Heart {
 		rightVentricle: rightVentricle,
 		leftVentricle:  leftVentricle,
 	}
+}
+
+func (h *Heart) SetConsumers(aorta, pulmonaryArtery circulation.BloodConsumer) {
+	h.leftVentricle.Artery = aorta
+	h.rightVentricle.Artery = pulmonaryArtery
 }
 
 type atrium struct {

@@ -1,6 +1,7 @@
 package body
 
 import (
+	"os"
 	"time"
 
 	"github.com/villekuosmanen/physiology-sim/src/organ"
@@ -11,35 +12,111 @@ import (
 const heartRate = 80
 
 type Body struct {
-	Heart            organ.Heart
-	Aorta            circulation.Vessel
-	SuperiorVenaCava circulation.Vessel
-	InferiorVenaCava circulation.Vessel
+	Heart            *organ.Heart
+	Aorta            *circulation.Vessel
+	SuperiorVenaCava *circulation.Vessel
+	InferiorVenaCava *circulation.Vessel
 
-	PulmonaryArtery circulation.Vessel
-	PulmonaryVein   circulation.Vessel
-	Lungs           organ.Lungs
+	PulmonaryArtery *circulation.Vessel
+	PulmonaryVein   *circulation.Vessel
+	Lungs           *organ.Lungs
 
-	Brain       organ.Brain
-	Liver       organ.Liver
-	LeftKidney  organ.Kidney
-	RightKidney organ.Kidney
+	Brain       *organ.Brain
+	Liver       *organ.Liver
+	LeftKidney  *organ.Kidney
+	RightKidney *organ.Kidney
 
 	// To be added
 	// digestive tract
 	// Portal Vein
 
-	LeftBreast  organ.TorsoPart
-	RightBreast organ.TorsoPart
-	Abdomen     organ.TorsoPart
+	LeftBreast  *organ.TorsoPart
+	RightBreast *organ.TorsoPart
+	Abdomen     *organ.TorsoPart
 
-	RightArm organ.Limb
-	LeftArm  organ.Limb
-	RightLeg organ.Limb
-	LeftLeg  organ.Limb
+	RightArm *organ.Limb
+	LeftArm  *organ.Limb
+	RightLeg *organ.Limb
+	LeftLeg  *organ.Limb
 }
 
-func (b *Body) Run(frequency float64, realtime bool) {
+func ConstructBody() *Body {
+	// heart and veins
+	heart := organ.ConstructHeart()
+	superiorVenaCava := circulation.ConstructVessel([]circulation.BloodConsumer{
+		&heart.RightAtrium,
+	}, false)
+	inferiorVenaCava := circulation.ConstructVessel([]circulation.BloodConsumer{
+		&heart.RightAtrium,
+	}, false)
+
+	// major organs
+	brain := organ.ConstructBrain(superiorVenaCava)
+	liver := organ.ConstructLiver(inferiorVenaCava)
+	leftKidney := organ.ConstructKidney(inferiorVenaCava)
+	rightKidney := organ.ConstructKidney(inferiorVenaCava)
+
+	// limbs and torso
+	leftBreast := organ.ConstructTorsoPart(0.7, superiorVenaCava)
+	rightBreast := organ.ConstructTorsoPart(0.7, superiorVenaCava)
+	abdomen := organ.ConstructTorsoPart(0.5, inferiorVenaCava)
+
+	rightArm := organ.ConstructLimb(0.8, superiorVenaCava)
+	leftArm := organ.ConstructLimb(0.8, superiorVenaCava)
+	rightLeg := organ.ConstructLimb(0.8, inferiorVenaCava)
+	leftLeg := organ.ConstructLimb(0.8, inferiorVenaCava)
+
+	// lungs and pulmonary veins
+	pulmonaryVein := circulation.ConstructVessel([]circulation.BloodConsumer{
+		&heart.LeftAtrium,
+	}, false)
+	lungs := organ.ConstructLungs(pulmonaryVein)
+
+	// arteries
+	pulmonaryArtery := circulation.ConstructVessel([]circulation.BloodConsumer{
+		lungs,
+	}, true)
+	aorta := circulation.ConstructVessel([]circulation.BloodConsumer{
+		brain,
+		liver,
+		leftKidney,
+		rightKidney,
+		&heart.Myocardium,
+		leftBreast,
+		rightBreast,
+		abdomen,
+		rightArm,
+		leftArm,
+		rightLeg,
+		leftLeg,
+	}, true)
+
+	// set consumers to heart
+	heart.SetConsumers(aorta, pulmonaryArtery)
+
+	return &Body{
+		Heart:            heart,
+		Aorta:            aorta,
+		SuperiorVenaCava: superiorVenaCava,
+		InferiorVenaCava: inferiorVenaCava,
+		PulmonaryArtery:  pulmonaryArtery,
+		PulmonaryVein:    pulmonaryVein,
+		Lungs:            lungs,
+		Brain:            brain,
+		Liver:            liver,
+		LeftKidney:       leftKidney,
+		RightKidney:      rightKidney,
+		LeftBreast:       leftBreast,
+		RightBreast:      rightBreast,
+		Abdomen:          abdomen,
+		RightArm:         rightArm,
+		LeftArm:          leftArm,
+		RightLeg:         rightLeg,
+		LeftLeg:          leftLeg,
+	}
+}
+
+func (b *Body) Run(frequency float64, realtime bool, sigs <-chan os.Signal) {
 	// run forever in given Hz
 	untilNextHeartbeat := 0.0
 
@@ -52,17 +129,19 @@ func (b *Body) Run(frequency float64, realtime bool) {
 	}
 
 	for {
-		// wait for a tick
-		<-t.C
+		select {
+		case <-t.C:
+			if untilNextHeartbeat <= 0 {
+				b.Heart.Beat()
+				untilNextHeartbeat = heartRate * frequency
+			} else {
+				untilNextHeartbeat -= 1
+			}
+			b.Act()
 
-		if untilNextHeartbeat <= 0 {
-			b.Heart.Beat()
-			untilNextHeartbeat = heartRate * frequency
-		} else {
-			untilNextHeartbeat -= 1
+		case <-sigs:
+			return
 		}
-
-		b.Act()
 	}
 }
 

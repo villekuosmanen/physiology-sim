@@ -15,8 +15,8 @@ type Brain struct {
 var _ circulation.BloodConsumer = (*Brain)(nil)
 var _ control.Controller = (*Brain)(nil)
 
-func ConstructBrain(consumer circulation.BloodConsumer) *Liver {
-	return &Liver{
+func ConstructBrain(consumer circulation.BloodConsumer) *Brain {
+	return &Brain{
 		blood:     circulation.Blood{},
 		emptyRate: circulation.EmptyRateSlow,
 		consumer:  consumer,
