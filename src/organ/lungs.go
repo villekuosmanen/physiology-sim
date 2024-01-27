@@ -3,13 +3,13 @@ package organ
 import (
 	"github.com/villekuosmanen/physiology-sim/src/systems/circulation"
 	"github.com/villekuosmanen/physiology-sim/src/systems/control"
+	"github.com/villekuosmanen/physiology-sim/src/systems/metabolism"
 )
 
 type Lungs struct {
 	// contains a reservoir for blood
-	blood     *circulation.Blood
-	emptyRate float64 // the rate at which the vessel empties
-	consumer  circulation.BloodConsumer
+	vascularity *Vascularity
+	consumer    circulation.BloodConsumer
 }
 
 var _ circulation.BloodConsumer = (*Lungs)(nil)
@@ -17,23 +17,20 @@ var _ control.MonitorableController = (*Lungs)(nil)
 
 func ConstructLungs(consumer circulation.BloodConsumer) *Lungs {
 	return &Lungs{
-		blood:     &circulation.Blood{},
-		emptyRate: circulation.EmptyRateAverage,
-		consumer:  consumer,
+		vascularity: NewVascularity(VascularityRating3, &metabolism.OxygenMetaboliser{}),
+		consumer:    consumer,
 	}
 }
 
 // AcceptBlood implements circulation.BloodConsumer
 func (b *Lungs) AcceptBlood(bl circulation.Blood) {
-	b.blood.Merge(bl)
+	b.vascularity.AcceptBlood(bl)
 }
 
 // Act implements control.Controller
 func (b *Lungs) Act() {
-	// Currently the Lungs does nothing useful.
-
-	// move blood away from the Lungs
-	bl := b.blood.Extract(b.emptyRate)
+	// Metabolise
+	bl := b.vascularity.Process()
 	b.consumer.AcceptBlood(bl)
 }
 
@@ -41,6 +38,6 @@ func (b *Lungs) Act() {
 func (b *Lungs) Monitor() *control.BloodStatistics {
 	return &control.BloodStatistics{
 		ComponentName: "Lungs",
-		BloodQuantity: b.blood.Quantity,
+		BloodQuantity: b.vascularity.BloodQuantity(),
 	}
 }

@@ -3,39 +3,39 @@ package organ
 import (
 	"github.com/villekuosmanen/physiology-sim/src/systems/circulation"
 	"github.com/villekuosmanen/physiology-sim/src/systems/control"
+	"github.com/villekuosmanen/physiology-sim/src/systems/metabolism"
 )
 
 type Kidney struct {
 	// contains a reservoir for blood
-	name      string
-	blood     *circulation.Blood
-	emptyRate float64 // the rate at which the vessel empties
-	consumer  circulation.BloodConsumer
+	name        string
+	vascularity *Vascularity
+	consumer    circulation.BloodConsumer
 }
 
 var _ circulation.BloodConsumer = (*Kidney)(nil)
 var _ control.MonitorableController = (*Kidney)(nil)
 
+// NOTE:
+// kidneys are not very vascular but have a massive blood supply
+
 func ConstructKidney(name string, consumer circulation.BloodConsumer) *Kidney {
 	return &Kidney{
-		name:      name,
-		blood:     &circulation.Blood{},
-		emptyRate: circulation.EmptyRateSlow,
-		consumer:  consumer,
+		name:        name,
+		vascularity: NewVascularity(VascularityRating4, &metabolism.OxygenMetaboliser{}),
+		consumer:    consumer,
 	}
 }
 
 // AcceptBlood implements circulation.BloodConsumer
 func (b *Kidney) AcceptBlood(bl circulation.Blood) {
-	b.blood.Merge(bl)
+	b.vascularity.AcceptBlood(bl)
 }
 
 // Act implements control.Controller
 func (b *Kidney) Act() {
-	// Currently the Kidney does nothing useful.
-
-	// move blood away from the Kidney
-	bl := b.blood.Extract(b.emptyRate)
+	// Metabolise
+	bl := b.vascularity.Process()
 	b.consumer.AcceptBlood(bl)
 }
 
@@ -43,6 +43,6 @@ func (b *Kidney) Act() {
 func (v *Kidney) Monitor() *control.BloodStatistics {
 	return &control.BloodStatistics{
 		ComponentName: v.name,
-		BloodQuantity: v.blood.Quantity,
+		BloodQuantity: v.vascularity.BloodQuantity(),
 	}
 }

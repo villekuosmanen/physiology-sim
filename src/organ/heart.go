@@ -106,7 +106,7 @@ func (h *Heart) MonitorHeart() []*control.BloodStatistics {
 	})
 	stats = append(stats, &control.BloodStatistics{
 		ComponentName: "Heart (myocardium)",
-		BloodQuantity: h.Myocardium.blood.Quantity,
+		BloodQuantity: h.Myocardium.BloodQuantity(),
 	})
 
 	return stats

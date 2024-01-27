@@ -3,13 +3,13 @@ package organ
 import (
 	"github.com/villekuosmanen/physiology-sim/src/systems/circulation"
 	"github.com/villekuosmanen/physiology-sim/src/systems/control"
+	"github.com/villekuosmanen/physiology-sim/src/systems/metabolism"
 )
 
 type Muscle struct {
 	// contains a reservoir for blood
-	blood     *circulation.Blood
-	emptyRate float64 // the rate at which the vessel empties
-	consumer  circulation.BloodConsumer
+	vascularity *Vascularity
+	consumer    circulation.BloodConsumer
 }
 
 var _ circulation.BloodConsumer = (*Muscle)(nil)
@@ -17,22 +17,23 @@ var _ control.Controller = (*Muscle)(nil)
 
 func ConstructMuscle(consumer circulation.BloodConsumer) *Muscle {
 	return &Muscle{
-		blood:     &circulation.Blood{},
-		emptyRate: circulation.EmptyRateAverage,
-		consumer:  consumer,
+		vascularity: NewVascularity(VascularityRating4, &metabolism.OxygenMetaboliser{}),
+		consumer:    consumer,
 	}
 }
 
 // AcceptBlood implements circulation.BloodConsumer
 func (b *Muscle) AcceptBlood(bl circulation.Blood) {
-	b.blood.Merge(bl)
+	b.vascularity.AcceptBlood(bl)
 }
 
 // Act implements control.Controller
 func (b *Muscle) Act() {
-	// Currently the Muscle does nothing useful.
-
-	// move blood away from the Muscle
-	bl := b.blood.Extract(b.emptyRate)
+	// Metabolise
+	bl := b.vascularity.Process()
 	b.consumer.AcceptBlood(bl)
+}
+
+func (b *Muscle) BloodQuantity() float64 {
+	return b.vascularity.BloodQuantity()
 }

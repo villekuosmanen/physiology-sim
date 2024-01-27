@@ -45,6 +45,6 @@ func (b *Limb) Act() {
 func (b *Limb) Monitor() *control.BloodStatistics {
 	return &control.BloodStatistics{
 		ComponentName: b.name,
-		BloodQuantity: b.muscle.blood.Quantity + b.fat.blood.Quantity,
+		BloodQuantity: b.muscle.BloodQuantity() + b.fat.BloodQuantity(),
 	}
 }
