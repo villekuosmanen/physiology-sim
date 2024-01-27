@@ -1,6 +1,9 @@
 package organ
 
-import "github.com/villekuosmanen/physiology-sim/src/systems/circulation"
+import (
+	"github.com/villekuosmanen/physiology-sim/src/systems/circulation"
+	"github.com/villekuosmanen/physiology-sim/src/systems/control"
+)
 
 type Heart struct {
 	// contains a muscle
@@ -15,8 +18,12 @@ type Heart struct {
 }
 
 func ConstructHeart() *Heart {
-	leftAtrium := atrium{}
-	rightAtrium := atrium{}
+	leftAtrium := atrium{
+		Blood: &circulation.Blood{},
+	}
+	rightAtrium := atrium{
+		Blood: &circulation.Blood{},
+	}
 
 	myocardium := ConstructMuscle(&rightAtrium)
 
@@ -48,7 +55,7 @@ func (h *Heart) SetConsumers(aorta, pulmonaryArtery circulation.BloodConsumer) {
 }
 
 type atrium struct {
-	Blood circulation.Blood
+	Blood *circulation.Blood
 }
 
 var _ circulation.BloodConsumer = (*atrium)(nil)
@@ -63,18 +70,44 @@ type ventricle struct {
 }
 
 func (h *Heart) Beat() {
-	// TODO
 	// blood moves from atria to ventricles
 	br := h.RightAtrium.Blood.Extract(0.95)
 	h.rightVentricle.Blood.Merge(br)
 
 	bl := h.LeftAtrium.Blood.Extract(0.95)
-	h.rightVentricle.Blood.Merge(bl)
+	h.leftVentricle.Blood.Merge(bl)
 
 	// ventricles pump out blood to their outtakes
 	bro := h.rightVentricle.Blood.Extract(0.95)
 	h.rightVentricle.Artery.AcceptBlood(bro)
 
-	blo := h.rightVentricle.Blood.Extract(0.95)
+	blo := h.leftVentricle.Blood.Extract(0.95)
 	h.leftVentricle.Artery.AcceptBlood(blo)
+}
+
+func (h *Heart) MonitorHeart() []*control.BloodStatistics {
+	stats := []*control.BloodStatistics{}
+
+	stats = append(stats, &control.BloodStatistics{
+		ComponentName: "Heart (left atrium)",
+		BloodQuantity: h.LeftAtrium.Blood.Quantity,
+	})
+	stats = append(stats, &control.BloodStatistics{
+		ComponentName: "Heart (right atrium)",
+		BloodQuantity: h.RightAtrium.Blood.Quantity,
+	})
+	stats = append(stats, &control.BloodStatistics{
+		ComponentName: "Heart (left ventricle)",
+		BloodQuantity: h.leftVentricle.Blood.Quantity,
+	})
+	stats = append(stats, &control.BloodStatistics{
+		ComponentName: "Heart (right ventricle)",
+		BloodQuantity: h.rightVentricle.Blood.Quantity,
+	})
+	stats = append(stats, &control.BloodStatistics{
+		ComponentName: "Heart (myocardium)",
+		BloodQuantity: h.Myocardium.blood.Quantity,
+	})
+
+	return stats
 }

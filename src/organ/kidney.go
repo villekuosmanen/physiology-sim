@@ -7,17 +7,19 @@ import (
 
 type Kidney struct {
 	// contains a reservoir for blood
-	blood     circulation.Blood
+	name      string
+	blood     *circulation.Blood
 	emptyRate float64 // the rate at which the vessel empties
 	consumer  circulation.BloodConsumer
 }
 
 var _ circulation.BloodConsumer = (*Kidney)(nil)
-var _ control.Controller = (*Kidney)(nil)
+var _ control.MonitorableController = (*Kidney)(nil)
 
-func ConstructKidney(consumer circulation.BloodConsumer) *Kidney {
+func ConstructKidney(name string, consumer circulation.BloodConsumer) *Kidney {
 	return &Kidney{
-		blood:     circulation.Blood{},
+		name:      name,
+		blood:     &circulation.Blood{},
 		emptyRate: circulation.EmptyRateSlow,
 		consumer:  consumer,
 	}
@@ -35,4 +37,12 @@ func (b *Kidney) Act() {
 	// move blood away from the Kidney
 	bl := b.blood.Extract(b.emptyRate)
 	b.consumer.AcceptBlood(bl)
+}
+
+// Monitor implements control.Controller
+func (v *Kidney) Monitor() *control.BloodStatistics {
+	return &control.BloodStatistics{
+		ComponentName: v.name,
+		BloodQuantity: v.blood.Quantity,
+	}
 }

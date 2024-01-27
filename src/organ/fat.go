@@ -7,7 +7,7 @@ import (
 
 type Fat struct {
 	// contains a reservoir for blood
-	blood     circulation.Blood
+	blood     *circulation.Blood
 	emptyRate float64 // the rate at which the vessel empties
 	consumer  circulation.BloodConsumer
 }
@@ -17,7 +17,7 @@ var _ control.Controller = (*Fat)(nil)
 
 func ConstructFat(consumer circulation.BloodConsumer) *Fat {
 	return &Fat{
-		blood:     circulation.Blood{},
+		blood:     &circulation.Blood{},
 		emptyRate: circulation.EmptyRateAverage,
 		consumer:  consumer,
 	}

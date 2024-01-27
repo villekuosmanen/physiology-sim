@@ -1,6 +1,7 @@
 package body
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -43,53 +44,106 @@ type Body struct {
 func ConstructBody() *Body {
 	// heart and veins
 	heart := organ.ConstructHeart()
-	superiorVenaCava := circulation.ConstructVessel([]circulation.BloodConsumer{
-		&heart.RightAtrium,
-	}, false)
-	inferiorVenaCava := circulation.ConstructVessel([]circulation.BloodConsumer{
-		&heart.RightAtrium,
-	}, false)
+	superiorVenaCava := circulation.ConstructVessel(
+		"Superior Vena Cava",
+		circulation.VesselSizeLarge,
+		[]circulation.BloodConsumer{
+			&heart.RightAtrium,
+		},
+		false,
+	)
+	inferiorVenaCava := circulation.ConstructVessel(
+		"Inferior Vena Cava",
+		circulation.VesselSizeLarge,
+		[]circulation.BloodConsumer{
+			&heart.RightAtrium,
+		},
+		false,
+	)
 
 	// major organs
 	brain := organ.ConstructBrain(superiorVenaCava)
 	liver := organ.ConstructLiver(inferiorVenaCava)
-	leftKidney := organ.ConstructKidney(inferiorVenaCava)
-	rightKidney := organ.ConstructKidney(inferiorVenaCava)
+	leftKidney := organ.ConstructKidney("Left Kidney", inferiorVenaCava)
+	rightKidney := organ.ConstructKidney("Right Kidney", inferiorVenaCava)
 
 	// limbs and torso
-	leftBreast := organ.ConstructTorsoPart(0.7, superiorVenaCava)
-	rightBreast := organ.ConstructTorsoPart(0.7, superiorVenaCava)
-	abdomen := organ.ConstructTorsoPart(0.5, inferiorVenaCava)
+	leftBreast := organ.ConstructTorsoPart(
+		"Left Breast",
+		0.7,
+		superiorVenaCava,
+	)
+	rightBreast := organ.ConstructTorsoPart(
+		"Right Breast",
+		0.7,
+		superiorVenaCava,
+	)
+	abdomen := organ.ConstructTorsoPart(
+		"Abdomen",
+		0.5,
+		inferiorVenaCava,
+	)
 
-	rightArm := organ.ConstructLimb(0.8, superiorVenaCava)
-	leftArm := organ.ConstructLimb(0.8, superiorVenaCava)
-	rightLeg := organ.ConstructLimb(0.8, inferiorVenaCava)
-	leftLeg := organ.ConstructLimb(0.8, inferiorVenaCava)
+	rightArm := organ.ConstructLimb(
+		"Right Arm",
+		0.8,
+		superiorVenaCava,
+	)
+	leftArm := organ.ConstructLimb(
+		"Left Arm",
+		0.8,
+		superiorVenaCava,
+	)
+	rightLeg := organ.ConstructLimb(
+		"Right Leg",
+		0.8,
+		inferiorVenaCava,
+	)
+	leftLeg := organ.ConstructLimb(
+		"Left Leg",
+		0.8,
+		inferiorVenaCava,
+	)
 
 	// lungs and pulmonary veins
-	pulmonaryVein := circulation.ConstructVessel([]circulation.BloodConsumer{
-		&heart.LeftAtrium,
-	}, false)
+	pulmonaryVein := circulation.ConstructVessel(
+		"Pulmonary Vein",
+		circulation.VesselSizeMedium,
+		[]circulation.BloodConsumer{
+			&heart.LeftAtrium,
+		},
+		false,
+	)
 	lungs := organ.ConstructLungs(pulmonaryVein)
 
 	// arteries
-	pulmonaryArtery := circulation.ConstructVessel([]circulation.BloodConsumer{
-		lungs,
-	}, true)
-	aorta := circulation.ConstructVessel([]circulation.BloodConsumer{
-		brain,
-		liver,
-		leftKidney,
-		rightKidney,
-		&heart.Myocardium,
-		leftBreast,
-		rightBreast,
-		abdomen,
-		rightArm,
-		leftArm,
-		rightLeg,
-		leftLeg,
-	}, true)
+	pulmonaryArtery := circulation.ConstructVessel(
+		"Pulmonary Artery",
+		circulation.VesselSizeMedium,
+		[]circulation.BloodConsumer{
+			lungs,
+		},
+		true,
+	)
+	aorta := circulation.ConstructVessel(
+		"Aorta",
+		circulation.VesselSizeHuge,
+		[]circulation.BloodConsumer{
+			brain,
+			liver,
+			leftKidney,
+			rightKidney,
+			&heart.Myocardium,
+			leftBreast,
+			rightBreast,
+			abdomen,
+			rightArm,
+			leftArm,
+			rightLeg,
+			leftLeg,
+		},
+		true,
+	)
 
 	// set consumers to heart
 	heart.SetConsumers(aorta, pulmonaryArtery)
@@ -117,10 +171,14 @@ func ConstructBody() *Body {
 }
 
 func (b *Body) Run(frequency float64, realtime bool, sigs <-chan os.Signal) {
+	// get heart rate in frequency
+	heartRateFreq := (heartRate / 60) * frequency
+
 	// run forever in given Hz
 	untilNextHeartbeat := 0.0
 
 	var t *time.Ticker
+	var i int64
 	if realtime {
 		t = time.NewTicker(time.Second / time.Duration(frequency))
 	} else {
@@ -133,11 +191,14 @@ func (b *Body) Run(frequency float64, realtime bool, sigs <-chan os.Signal) {
 		case <-t.C:
 			if untilNextHeartbeat <= 0 {
 				b.Heart.Beat()
-				untilNextHeartbeat = heartRate * frequency
+				untilNextHeartbeat = heartRateFreq
 			} else {
 				untilNextHeartbeat -= 1
 			}
+
+			b.PrintStats()
 			b.Act()
+			i++
 
 		case <-sigs:
 			return
@@ -148,10 +209,6 @@ func (b *Body) Run(frequency float64, realtime bool, sigs <-chan os.Signal) {
 func (b *Body) Act() {
 	b.Heart.Myocardium.Act()
 	b.Aorta.Act()
-
-	b.PulmonaryArtery.Act()
-	b.Lungs.Act()
-	b.InferiorVenaCava.Act()
 
 	b.Brain.Act()
 	b.Liver.Act()
@@ -167,6 +224,81 @@ func (b *Body) Act() {
 	b.RightLeg.Act()
 	b.LeftLeg.Act()
 
+	b.PulmonaryArtery.Act()
+	b.Lungs.Act()
+	b.PulmonaryVein.Act()
+
 	b.SuperiorVenaCava.Act()
 	b.InferiorVenaCava.Act()
+}
+
+func (b *Body) PrintStats() {
+	total := 0.0
+	fmt.Println("********************************")
+
+	heartStats := b.Heart.MonitorHeart()
+	for _, hs := range heartStats {
+		total += hs.BloodQuantity
+		hs.Print()
+	}
+	s := b.Aorta.Monitor()
+	total += s.BloodQuantity
+	s.Print()
+
+	s = b.Brain.Monitor()
+	total += s.BloodQuantity
+	s.Print()
+	s = b.Liver.Monitor()
+	total += s.BloodQuantity
+	s.Print()
+	s = b.LeftKidney.Monitor()
+	total += s.BloodQuantity
+	s.Print()
+	s = b.RightKidney.Monitor()
+	total += s.BloodQuantity
+	s.Print()
+
+	s = b.LeftBreast.Monitor()
+	total += s.BloodQuantity
+	s.Print()
+	s = b.RightBreast.Monitor()
+	total += s.BloodQuantity
+	s.Print()
+	s = b.Abdomen.Monitor()
+	total += s.BloodQuantity
+	s.Print()
+
+	s = b.RightArm.Monitor()
+	total += s.BloodQuantity
+	s.Print()
+	s = b.LeftArm.Monitor()
+	total += s.BloodQuantity
+	s.Print()
+	s = b.RightLeg.Monitor()
+	total += s.BloodQuantity
+	s.Print()
+	s = b.LeftLeg.Monitor()
+	total += s.BloodQuantity
+	s.Print()
+
+	s = b.PulmonaryArtery.Monitor()
+	total += s.BloodQuantity
+	s.Print()
+	s = b.Lungs.Monitor()
+	total += s.BloodQuantity
+	s.Print()
+	s = b.PulmonaryVein.Monitor()
+	total += s.BloodQuantity
+	s.Print()
+
+	s = b.SuperiorVenaCava.Monitor()
+	total += s.BloodQuantity
+	s.Print()
+	s = b.InferiorVenaCava.Monitor()
+	total += s.BloodQuantity
+	s.Print()
+
+	fmt.Printf("****** TOTAL: %.2f *********\n", total)
+	fmt.Println("********************************")
+	fmt.Println("")
 }

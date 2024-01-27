@@ -4,22 +4,32 @@ import "github.com/villekuosmanen/physiology-sim/src/systems/control"
 
 type Vessel struct {
 	// contains a reservoir for blood
-	blood     Blood
+	name      string
+	blood     *Blood
 	emptyRate float64 // the rate at which the vessel empties
 	consumers []BloodConsumer
 }
 
-var _ BloodConsumer = (*Vessel)(nil)
-var _ control.Controller = (*Vessel)(nil)
+const (
+	VesselSizeHuge   = 0.75
+	VesselSizeLarge  = 1
+	VesselSizeMedium = 1.5
+)
 
-func ConstructVessel(consumers []BloodConsumer, isArtery bool) *Vessel {
+var _ BloodConsumer = (*Vessel)(nil)
+var _ control.MonitorableController = (*Vessel)(nil)
+
+func ConstructVessel(name string, vesselSize float64, consumers []BloodConsumer, isArtery bool) *Vessel {
 	emptyRate := EmptyRateFast
 	if isArtery {
 		emptyRate = EmptyRateVeryFast
 	}
 
+	emptyRate *= vesselSize
+
 	return &Vessel{
-		blood:     Blood{},
+		name:      name,
+		blood:     &Blood{},
 		emptyRate: emptyRate,
 		consumers: consumers,
 	}
@@ -36,6 +46,14 @@ func (v *Vessel) Act() {
 
 	for _, c := range v.consumers {
 		c.AcceptBlood(bloodPerConsumer)
+	}
+}
+
+// Monitor implements control.Controller
+func (v *Vessel) Monitor() *control.BloodStatistics {
+	return &control.BloodStatistics{
+		ComponentName: v.name,
+		BloodQuantity: v.blood.Quantity,
 	}
 }
 

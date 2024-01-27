@@ -13,5 +13,5 @@ func main() {
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
 	body := body.ConstructBody()
-	body.Run(10, false, sigs)
+	body.Run(10, true, sigs)
 }

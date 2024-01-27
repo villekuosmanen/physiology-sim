@@ -6,16 +6,18 @@ import (
 )
 
 type TorsoPart struct {
+	name        string
 	muscle      *Muscle
 	fat         *Fat
 	muscleShare float64
 }
 
 var _ circulation.BloodConsumer = (*TorsoPart)(nil)
-var _ control.Controller = (*TorsoPart)(nil)
+var _ control.MonitorableController = (*TorsoPart)(nil)
 
-func ConstructTorsoPart(muscleShare float64, consumer circulation.BloodConsumer) *TorsoPart {
+func ConstructTorsoPart(name string, muscleShare float64, consumer circulation.BloodConsumer) *TorsoPart {
 	return &TorsoPart{
+		name:        name,
 		muscle:      ConstructMuscle(consumer),
 		fat:         ConstructFat(consumer),
 		muscleShare: muscleShare,
@@ -37,4 +39,12 @@ func (b *TorsoPart) Act() {
 	// TorsoPart asks for its constituents to act.
 	b.muscle.Act()
 	b.fat.Act()
+}
+
+// Monitor implements control.Controller
+func (b *TorsoPart) Monitor() *control.BloodStatistics {
+	return &control.BloodStatistics{
+		ComponentName: b.name,
+		BloodQuantity: b.muscle.blood.Quantity + b.fat.blood.Quantity,
+	}
 }

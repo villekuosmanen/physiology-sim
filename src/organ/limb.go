@@ -6,16 +6,18 @@ import (
 )
 
 type Limb struct {
+	name        string
 	muscle      *Muscle
 	fat         *Fat
 	muscleShare float64
 }
 
 var _ circulation.BloodConsumer = (*Limb)(nil)
-var _ control.Controller = (*Limb)(nil)
+var _ control.MonitorableController = (*Limb)(nil)
 
-func ConstructLimb(muscleShare float64, consumer circulation.BloodConsumer) *Limb {
+func ConstructLimb(name string, muscleShare float64, consumer circulation.BloodConsumer) *Limb {
 	return &Limb{
+		name:        name,
 		muscle:      ConstructMuscle(consumer),
 		fat:         ConstructFat(consumer),
 		muscleShare: muscleShare,
@@ -37,4 +39,12 @@ func (b *Limb) Act() {
 	// Limb asks for its constituents to act.
 	b.muscle.Act()
 	b.fat.Act()
+}
+
+// Monitor implements control.Controller
+func (b *Limb) Monitor() *control.BloodStatistics {
+	return &control.BloodStatistics{
+		ComponentName: b.name,
+		BloodQuantity: b.muscle.blood.Quantity + b.fat.blood.Quantity,
+	}
 }

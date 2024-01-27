@@ -7,17 +7,17 @@ import (
 
 type Liver struct {
 	// contains a reservoir for blood
-	blood     circulation.Blood
+	blood     *circulation.Blood
 	emptyRate float64 // the rate at which the vessel empties
 	consumer  circulation.BloodConsumer
 }
 
 var _ circulation.BloodConsumer = (*Liver)(nil)
-var _ control.Controller = (*Liver)(nil)
+var _ control.MonitorableController = (*Liver)(nil)
 
 func ConstructLiver(consumer circulation.BloodConsumer) *Liver {
 	return &Liver{
-		blood:     circulation.Blood{},
+		blood:     &circulation.Blood{},
 		emptyRate: circulation.EmptyRateVerySlow,
 		consumer:  consumer,
 	}
@@ -35,4 +35,12 @@ func (b *Liver) Act() {
 	// move blood away from the Liver
 	bl := b.blood.Extract(b.emptyRate)
 	b.consumer.AcceptBlood(bl)
+}
+
+// Monitor implements control.Controller
+func (b *Liver) Monitor() *control.BloodStatistics {
+	return &control.BloodStatistics{
+		ComponentName: "Liver",
+		BloodQuantity: b.blood.Quantity,
+	}
 }
