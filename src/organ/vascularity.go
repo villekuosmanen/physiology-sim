@@ -73,3 +73,11 @@ func (v *Vascularity) BloodQuantity() float64 {
 func (v *Vascularity) OxygenSaturation() float64 {
 	return v.Gates[len(v.Gates)-1].blood.OxygenSaturation
 }
+
+func (v *Vascularity) LacticAcid() float64 {
+	return v.Gates[len(v.Gates)-1].blood.LacticAcid
+}
+
+func (v *Vascularity) Norepinephrine() float64 {
+	return v.Gates[len(v.Gates)-1].blood.Norepinephrine
+}

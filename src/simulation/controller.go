@@ -1,4 +1,4 @@
-package control
+package simulation
 
 type Controller interface {
 	Act()

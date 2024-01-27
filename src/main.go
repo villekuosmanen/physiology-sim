@@ -6,6 +6,7 @@ import (
 	"syscall"
 
 	"github.com/villekuosmanen/physiology-sim/src/body"
+	"github.com/villekuosmanen/physiology-sim/src/systems/metabolism"
 )
 
 func main() {
@@ -13,5 +14,7 @@ func main() {
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
 	body := body.ConstructBody()
+	body.SetMetabolicRate(metabolism.METLightCardio)
+
 	body.Run(10, true, sigs)
 }

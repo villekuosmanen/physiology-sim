@@ -1,8 +1,8 @@
 package organ
 
 import (
+	"github.com/villekuosmanen/physiology-sim/src/simulation"
 	"github.com/villekuosmanen/physiology-sim/src/systems/circulation"
-	"github.com/villekuosmanen/physiology-sim/src/systems/control"
 	"github.com/villekuosmanen/physiology-sim/src/systems/metabolism"
 )
 
@@ -14,7 +14,7 @@ type Kidney struct {
 }
 
 var _ circulation.BloodConsumer = (*Kidney)(nil)
-var _ control.MonitorableController = (*Kidney)(nil)
+var _ simulation.MonitorableController = (*Kidney)(nil)
 
 // NOTE:
 // kidneys are not very vascular but have a massive blood supply
@@ -32,16 +32,16 @@ func (b *Kidney) AcceptBlood(bl circulation.Blood) {
 	b.vascularity.AcceptBlood(bl)
 }
 
-// Act implements control.Controller
+// Act implements simulation.Controller
 func (b *Kidney) Act() {
 	// Metabolise
 	bl := b.vascularity.Process()
 	b.consumer.AcceptBlood(bl)
 }
 
-// Monitor implements control.Controller
-func (v *Kidney) Monitor() *control.BloodStatistics {
-	return &control.BloodStatistics{
+// Monitor implements simulation.Controller
+func (v *Kidney) Monitor() *simulation.BloodStatistics {
+	return &simulation.BloodStatistics{
 		ComponentName:       v.name,
 		BloodQuantity:       v.vascularity.BloodQuantity(),
 		HasOxygenSaturation: true,

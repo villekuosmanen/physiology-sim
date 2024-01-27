@@ -1,8 +1,8 @@
 package organ
 
 import (
+	"github.com/villekuosmanen/physiology-sim/src/simulation"
 	"github.com/villekuosmanen/physiology-sim/src/systems/circulation"
-	"github.com/villekuosmanen/physiology-sim/src/systems/control"
 )
 
 type Heart struct {
@@ -87,33 +87,33 @@ func (h *Heart) Beat() {
 	h.leftVentricle.Artery.AcceptBlood(blo)
 }
 
-func (h *Heart) MonitorHeart() []*control.BloodStatistics {
-	stats := []*control.BloodStatistics{}
+func (h *Heart) MonitorHeart() []*simulation.BloodStatistics {
+	stats := []*simulation.BloodStatistics{}
 
-	stats = append(stats, &control.BloodStatistics{
+	stats = append(stats, &simulation.BloodStatistics{
 		ComponentName:       "Heart (left atrium)",
 		BloodQuantity:       h.LeftAtrium.Blood.Quantity,
 		HasOxygenSaturation: true,
 		OxygenSaturation:    h.LeftAtrium.Blood.OxygenSaturation,
 	})
-	stats = append(stats, &control.BloodStatistics{
+	stats = append(stats, &simulation.BloodStatistics{
 		ComponentName:       "Heart (right atrium)",
 		BloodQuantity:       h.RightAtrium.Blood.Quantity,
 		HasOxygenSaturation: true,
 		OxygenSaturation:    h.RightAtrium.Blood.OxygenSaturation,
 	})
-	stats = append(stats, &control.BloodStatistics{
-		ComponentName: "Heart (left ventricle)",
-		BloodQuantity: h.leftVentricle.Blood.Quantity,
-	})
-	stats = append(stats, &control.BloodStatistics{
-		ComponentName: "Heart (right ventricle)",
-		BloodQuantity: h.rightVentricle.Blood.Quantity,
-	})
-	stats = append(stats, &control.BloodStatistics{
-		ComponentName: "Heart (myocardium)",
-		BloodQuantity: h.Myocardium.BloodQuantity(),
-	})
+	// stats = append(stats, &simulation.BloodStatistics{
+	// 	ComponentName: "Heart (left ventricle)",
+	// 	BloodQuantity: h.leftVentricle.Blood.Quantity,
+	// })
+	// stats = append(stats, &simulation.BloodStatistics{
+	// 	ComponentName: "Heart (right ventricle)",
+	// 	BloodQuantity: h.rightVentricle.Blood.Quantity,
+	// })
+	// stats = append(stats, &simulation.BloodStatistics{
+	// 	ComponentName: "Heart (myocardium)",
+	// 	BloodQuantity: h.Myocardium.BloodQuantity(),
+	// })
 
 	return stats
 }

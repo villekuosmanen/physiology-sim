@@ -1,8 +1,8 @@
 package organ
 
 import (
+	"github.com/villekuosmanen/physiology-sim/src/simulation"
 	"github.com/villekuosmanen/physiology-sim/src/systems/circulation"
-	"github.com/villekuosmanen/physiology-sim/src/systems/control"
 	"github.com/villekuosmanen/physiology-sim/src/systems/metabolism"
 )
 
@@ -13,7 +13,7 @@ type Liver struct {
 }
 
 var _ circulation.BloodConsumer = (*Liver)(nil)
-var _ control.MonitorableController = (*Liver)(nil)
+var _ simulation.MonitorableController = (*Liver)(nil)
 
 func ConstructLiver(consumer circulation.BloodConsumer) *Liver {
 	return &Liver{
@@ -27,16 +27,16 @@ func (b *Liver) AcceptBlood(bl circulation.Blood) {
 	b.vascularity.AcceptBlood(bl)
 }
 
-// Act implements control.Controller
+// Act implements simulation.Controller
 func (b *Liver) Act() {
 	// Metabolise
 	bl := b.vascularity.Process()
 	b.consumer.AcceptBlood(bl)
 }
 
-// Monitor implements control.Controller
-func (b *Liver) Monitor() *control.BloodStatistics {
-	return &control.BloodStatistics{
+// Monitor implements simulation.Controller
+func (b *Liver) Monitor() *simulation.BloodStatistics {
+	return &simulation.BloodStatistics{
 		ComponentName: "Liver",
 		BloodQuantity: b.vascularity.BloodQuantity(),
 	}

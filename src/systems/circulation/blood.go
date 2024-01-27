@@ -2,8 +2,13 @@ package circulation
 
 type Blood struct {
 	// contains everything in a blood
-	Quantity         float64
-	OxygenSaturation float64
+	Quantity         float64 // percentage (100 is max amount)
+	OxygenSaturation float64 // between 0 - 1
+	LacticAcid       float64 // from 0
+
+	// Neurotransmitters
+	// Norepinephrine regulates Sympathetic Nervous System
+	Norepinephrine float64 // from 0
 }
 
 // Extract removes a given fraction of blood in the system.
@@ -15,6 +20,8 @@ func (b *Blood) Extract(fraction float64) Blood {
 	return Blood{
 		Quantity:         qty,
 		OxygenSaturation: b.OxygenSaturation,
+		LacticAcid:       b.LacticAcid,
+		Norepinephrine:   b.Norepinephrine,
 	}
 }
 
@@ -23,13 +30,28 @@ func (b *Blood) Merge(a Blood) {
 	total := b.Quantity + a.Quantity
 	bFraction := b.Quantity / total
 	oxygenSat := (b.OxygenSaturation * bFraction) + (a.OxygenSaturation * (1 - bFraction))
+	lactic := (b.LacticAcid * bFraction) + (a.LacticAcid * (1 - bFraction))
+	norepinephrine := (b.Norepinephrine * bFraction) + (a.Norepinephrine * (1 - bFraction))
 
 	b.Quantity = total
 	if total == 0 {
 		b.OxygenSaturation = 0
+		b.LacticAcid = 0
+		b.Norepinephrine = 0
 	} else {
 		b.OxygenSaturation = oxygenSat
+		b.LacticAcid = lactic
+		b.Norepinephrine = norepinephrine
 	}
+}
+
+// Acidity returns a simplified metric of acidity of the blood.
+// It is calibrated at 0, with positive valus indicating acidity.
+func (b *Blood) Acidity() float64 {
+	oxygenFactor := (b.OxygenSaturation * -1) + 0.90
+	lacticAcidFactor := b.LacticAcid
+
+	return oxygenFactor + lacticAcidFactor
 }
 
 // RemoveFrom removes the given fraction's worth of blood from input.
@@ -38,5 +60,7 @@ func RemoveFrom(b Blood, fraction float64) Blood {
 	return Blood{
 		Quantity:         qty,
 		OxygenSaturation: b.OxygenSaturation,
+		LacticAcid:       b.LacticAcid,
+		Norepinephrine:   b.Norepinephrine,
 	}
 }

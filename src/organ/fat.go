@@ -1,8 +1,8 @@
 package organ
 
 import (
+	"github.com/villekuosmanen/physiology-sim/src/simulation"
 	"github.com/villekuosmanen/physiology-sim/src/systems/circulation"
-	"github.com/villekuosmanen/physiology-sim/src/systems/control"
 	"github.com/villekuosmanen/physiology-sim/src/systems/metabolism"
 )
 
@@ -13,7 +13,7 @@ type Fat struct {
 }
 
 var _ circulation.BloodConsumer = (*Fat)(nil)
-var _ control.Controller = (*Fat)(nil)
+var _ simulation.Controller = (*Fat)(nil)
 
 func ConstructFat(consumer circulation.BloodConsumer) *Fat {
 	return &Fat{
@@ -27,7 +27,7 @@ func (f *Fat) AcceptBlood(bl circulation.Blood) {
 	f.vascularity.AcceptBlood(bl)
 }
 
-// Act implements control.Controller
+// Act implements simulation.Controller
 func (f *Fat) Act() {
 	// Metabolise
 	bl := f.vascularity.Process()

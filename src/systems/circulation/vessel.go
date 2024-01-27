@@ -1,6 +1,8 @@
 package circulation
 
-import "github.com/villekuosmanen/physiology-sim/src/systems/control"
+import (
+	"github.com/villekuosmanen/physiology-sim/src/simulation"
+)
 
 type Vessel struct {
 	// contains a reservoir for blood
@@ -22,7 +24,7 @@ const (
 )
 
 var _ BloodConsumer = (*Vessel)(nil)
-var _ control.MonitorableController = (*Vessel)(nil)
+var _ simulation.MonitorableController = (*Vessel)(nil)
 
 func ConstructVessel(
 	name string,
@@ -45,7 +47,7 @@ func ConstructVessel(
 	}
 }
 
-// Act implements control.Controller
+// Act implements simulation.Controller
 func (v *Vessel) Act() {
 	// At each tick, a share of the blood avaiable in the artery is sent to its outflows
 	// TODO: this is unrealistic.
@@ -63,9 +65,9 @@ func (v *Vessel) Act() {
 	}
 }
 
-// Monitor implements control.Controller
-func (v *Vessel) Monitor() *control.BloodStatistics {
-	return &control.BloodStatistics{
+// Monitor implements simulation.Controller
+func (v *Vessel) Monitor() *simulation.BloodStatistics {
+	return &simulation.BloodStatistics{
 		ComponentName: v.name,
 		BloodQuantity: v.blood.Quantity,
 	}

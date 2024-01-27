@@ -7,6 +7,7 @@ import (
 
 	"github.com/villekuosmanen/physiology-sim/src/organ"
 	"github.com/villekuosmanen/physiology-sim/src/systems/circulation"
+	"github.com/villekuosmanen/physiology-sim/src/systems/metabolism"
 )
 
 // TODO this should not be a constant
@@ -363,4 +364,18 @@ func (b *Body) PrintStats() {
 	fmt.Printf("****** TOTAL: %.2f *********\n", total)
 	fmt.Println("********************************")
 	fmt.Println("")
+}
+
+func (b *Body) SetMetabolicRate(m metabolism.MET) {
+	// TODO:
+	// Myocardium metabolic rate should be set by heart rate
+	// The faster the heart rate the more it consumes
+	b.LeftArm.Muscle.SetMetabolicRate(m)
+	b.RightArm.Muscle.SetMetabolicRate(m)
+	b.LeftLeg.Muscle.SetMetabolicRate(m)
+	b.RightArm.Muscle.SetMetabolicRate(m)
+
+	b.Abdomen.Muscle.SetMetabolicRate(m)
+	b.RightBreast.Muscle.SetMetabolicRate(m)
+	b.LeftBreast.Muscle.SetMetabolicRate(m)
 }
