@@ -5,18 +5,18 @@ import (
 	"github.com/villekuosmanen/physiology-sim/src/systems/control"
 )
 
-type Fat struct {
+type Lungs struct {
 	// contains a reservoir for blood
 	blood     circulation.Blood
 	emptyRate float64 // the rate at which the vessel empties
 	consumer  circulation.BloodConsumer
 }
 
-var _ circulation.BloodConsumer = (*Fat)(nil)
-var _ control.Controller = (*Fat)(nil)
+var _ circulation.BloodConsumer = (*Lungs)(nil)
+var _ control.Controller = (*Lungs)(nil)
 
-func ConstructFat(consumer circulation.BloodConsumer) *Fat {
-	return &Fat{
+func ConstructLungs(consumer circulation.BloodConsumer) *Lungs {
+	return &Lungs{
 		blood:     circulation.Blood{},
 		emptyRate: circulation.EmptyRateAverage,
 		consumer:  consumer,
@@ -24,15 +24,15 @@ func ConstructFat(consumer circulation.BloodConsumer) *Fat {
 }
 
 // AcceptBlood implements circulation.BloodConsumer
-func (f *Fat) AcceptBlood(bl circulation.Blood) {
-	f.blood.Merge(bl)
+func (b *Lungs) AcceptBlood(bl circulation.Blood) {
+	b.blood.Merge(bl)
 }
 
 // Act implements control.Controller
-func (f *Fat) Act() {
-	// Currently the Fat does nothing useful.
+func (b *Lungs) Act() {
+	// Currently the Lungs does nothing useful.
 
-	// move blood away from the Fat
-	bl := f.blood.Extract(f.emptyRate)
-	f.consumer.AcceptBlood(bl)
+	// move blood away from the Lungs
+	bl := b.blood.Extract(b.emptyRate)
+	b.consumer.AcceptBlood(bl)
 }

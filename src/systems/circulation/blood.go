@@ -20,3 +20,11 @@ func (b *Blood) Extract(fraction float64) Blood {
 func (b *Blood) Merge(a Blood) {
 	b.Quantity += a.Quantity
 }
+
+// DivideBlood divides a blood into even fractions, as represented by the blood unit returned.
+func DivideBlood(a Blood, shares int) Blood {
+	qty := a.Quantity / float64(shares)
+	return Blood{
+		Quantity: qty,
+	}
+}
