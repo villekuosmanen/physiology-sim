@@ -36,7 +36,7 @@ func NewVascularity(numberOfGates int, metaboliser metabolism.Metaboliser) *Vasc
 	return &Vascularity{
 		Gates:          gates,
 		Metaboliser:    metaboliser,
-		gateMovingRate: circulation.EmptyRateFast,
+		gateMovingRate: circulation.EmptyRateVascularity,
 	}
 }
 

@@ -47,16 +47,22 @@ func ConstructBody() *Body {
 	superiorVenaCava := circulation.ConstructVessel(
 		"Superior Vena Cava",
 		circulation.VesselSizeLarge,
-		[]circulation.BloodConsumer{
-			&heart.RightAtrium,
+		[]circulation.ConsumerWithBloodSupply{
+			{
+				Consumer:    &heart.RightAtrium,
+				BloodSupply: 1,
+			},
 		},
 		false,
 	)
 	inferiorVenaCava := circulation.ConstructVessel(
 		"Inferior Vena Cava",
 		circulation.VesselSizeLarge,
-		[]circulation.BloodConsumer{
-			&heart.RightAtrium,
+		[]circulation.ConsumerWithBloodSupply{
+			{
+				Consumer:    &heart.RightAtrium,
+				BloodSupply: 1,
+			},
 		},
 		false,
 	)
@@ -109,8 +115,11 @@ func ConstructBody() *Body {
 	pulmonaryVein := circulation.ConstructVessel(
 		"Pulmonary Vein",
 		circulation.VesselSizeMedium,
-		[]circulation.BloodConsumer{
-			&heart.LeftAtrium,
+		[]circulation.ConsumerWithBloodSupply{
+			{
+				Consumer:    &heart.LeftAtrium,
+				BloodSupply: 1,
+			},
 		},
 		false,
 	)
@@ -120,27 +129,66 @@ func ConstructBody() *Body {
 	pulmonaryArtery := circulation.ConstructVessel(
 		"Pulmonary Artery",
 		circulation.VesselSizeMedium,
-		[]circulation.BloodConsumer{
-			lungs,
+		[]circulation.ConsumerWithBloodSupply{
+			{
+				Consumer:    lungs,
+				BloodSupply: 1,
+			},
 		},
 		true,
 	)
 	aorta := circulation.ConstructVessel(
 		"Aorta",
 		circulation.VesselSizeHuge,
-		[]circulation.BloodConsumer{
-			brain,
-			liver,
-			leftKidney,
-			rightKidney,
-			&heart.Myocardium,
-			leftBreast,
-			rightBreast,
-			abdomen,
-			rightArm,
-			leftArm,
-			rightLeg,
-			leftLeg,
+		[]circulation.ConsumerWithBloodSupply{
+			{
+				Consumer:    brain,
+				BloodSupply: 5,
+			},
+			{
+				Consumer:    liver,
+				BloodSupply: 4,
+			},
+			{
+				Consumer:    leftKidney,
+				BloodSupply: 3,
+			},
+			{
+				Consumer:    rightKidney,
+				BloodSupply: 3,
+			},
+			{
+				Consumer:    &heart.Myocardium,
+				BloodSupply: 0.125,
+			},
+			{
+				Consumer:    leftBreast,
+				BloodSupply: 1,
+			},
+			{
+				Consumer:    rightBreast,
+				BloodSupply: 1,
+			},
+			{
+				Consumer:    abdomen,
+				BloodSupply: 2,
+			},
+			{
+				Consumer:    rightArm,
+				BloodSupply: 1,
+			},
+			{
+				Consumer:    leftArm,
+				BloodSupply: 1,
+			},
+			{
+				Consumer:    rightLeg,
+				BloodSupply: 1,
+			},
+			{
+				Consumer:    leftLeg,
+				BloodSupply: 1,
+			},
 		},
 		true,
 	)

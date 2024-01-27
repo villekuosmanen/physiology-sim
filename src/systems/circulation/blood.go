@@ -21,9 +21,9 @@ func (b *Blood) Merge(a Blood) {
 	b.Quantity += a.Quantity
 }
 
-// DivideBlood divides a blood into even fractions, as represented by the blood unit returned.
-func DivideBlood(a Blood, shares int) Blood {
-	qty := a.Quantity / float64(shares)
+// RemoveFrom removes the given fraction's worth of blood from input.
+func RemoveFrom(a Blood, fraction float64) Blood {
+	qty := a.Quantity * fraction
 	return Blood{
 		Quantity: qty,
 	}

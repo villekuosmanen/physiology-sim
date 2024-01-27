@@ -7,7 +7,12 @@ type Vessel struct {
 	name      string
 	blood     *Blood
 	emptyRate float64 // the rate at which the vessel empties
-	consumers []BloodConsumer
+	consumers []ConsumerWithBloodSupply
+}
+
+type ConsumerWithBloodSupply struct {
+	Consumer    BloodConsumer
+	BloodSupply float64
 }
 
 const (
@@ -19,10 +24,15 @@ const (
 var _ BloodConsumer = (*Vessel)(nil)
 var _ control.MonitorableController = (*Vessel)(nil)
 
-func ConstructVessel(name string, vesselSize float64, consumers []BloodConsumer, isArtery bool) *Vessel {
-	emptyRate := EmptyRateFast
+func ConstructVessel(
+	name string,
+	vesselSize float64,
+	consumers []ConsumerWithBloodSupply,
+	isArtery bool,
+) *Vessel {
+	emptyRate := EmptyRateVein
 	if isArtery {
-		emptyRate = EmptyRateVeryFast
+		emptyRate = EmptyRateArtery
 	}
 
 	emptyRate *= vesselSize
@@ -42,10 +52,14 @@ func (v *Vessel) Act() {
 	// Each of the consumers needs to order a specific share of blood being consumed from the vessel.
 	// This ensures bigger organs receive more blood than smaller ones.
 	allBlood := v.blood.Extract(v.emptyRate)
-	bloodPerConsumer := DivideBlood(allBlood, len(v.consumers))
+	totalWeight := 0.0
+	for _, consumer := range v.consumers {
+		totalWeight += consumer.BloodSupply
+	}
 
-	for _, c := range v.consumers {
-		c.AcceptBlood(bloodPerConsumer)
+	for _, consumer := range v.consumers {
+		bloodPerConsumer := RemoveFrom(allBlood, (consumer.BloodSupply / totalWeight))
+		consumer.Consumer.AcceptBlood(bloodPerConsumer)
 	}
 }
 

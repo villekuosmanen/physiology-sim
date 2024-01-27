@@ -22,7 +22,7 @@ var _ control.MonitorableController = (*Kidney)(nil)
 func ConstructKidney(name string, consumer circulation.BloodConsumer) *Kidney {
 	return &Kidney{
 		name:        name,
-		vascularity: NewVascularity(VascularityRating4, &metabolism.OxygenMetaboliser{}),
+		vascularity: NewVascularity(VascularityRating3, &metabolism.OxygenMetaboliser{}),
 		consumer:    consumer,
 	}
 }

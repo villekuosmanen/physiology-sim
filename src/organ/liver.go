@@ -17,7 +17,7 @@ var _ control.MonitorableController = (*Liver)(nil)
 
 func ConstructLiver(consumer circulation.BloodConsumer) *Liver {
 	return &Liver{
-		vascularity: NewVascularity(VascularityRating10, &metabolism.OxygenMetaboliser{}),
+		vascularity: NewVascularity(VascularityRating8, &metabolism.OxygenMetaboliser{}),
 		consumer:    consumer,
 	}
 }

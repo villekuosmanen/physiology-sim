@@ -17,7 +17,7 @@ var _ control.MonitorableController = (*Brain)(nil)
 
 func ConstructBrain(consumer circulation.BloodConsumer) *Brain {
 	return &Brain{
-		vascularity: NewVascularity(VascularityRating10, &metabolism.OxygenMetaboliser{}),
+		vascularity: NewVascularity(VascularityRating8, &metabolism.OxygenMetaboliser{}),
 		consumer:    consumer,
 	}
 }
