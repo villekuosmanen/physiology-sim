@@ -10,9 +10,6 @@ import (
 	"github.com/villekuosmanen/physiology-sim/src/systems/metabolism"
 )
 
-// TODO this should not be a constant
-const heartRate = 80
-
 type Body struct {
 	Heart            *organ.Heart
 	Aorta            *circulation.Vessel
@@ -221,7 +218,7 @@ func ConstructBody() *Body {
 
 func (b *Body) Run(frequency float64, realtime bool, verbose bool, sigs <-chan os.Signal) {
 	// get heart rate in frequency
-	heartRateFreq := (heartRate / 60) * frequency
+	heartRate := 80.0
 
 	// run forever in given Hz
 	untilNextHeartbeat := 0.0
@@ -239,8 +236,8 @@ func (b *Body) Run(frequency float64, realtime bool, verbose bool, sigs <-chan o
 	fmt.Println("Starting simulation...")
 	for i := 0; i < 1_000_000; i++ {
 		if untilNextHeartbeat <= 0 {
-			b.Heart.Beat()
-			untilNextHeartbeat = heartRateFreq
+			heartRate = b.Heart.Beat()
+			untilNextHeartbeat = ticksUntilNextHeartbeat(heartRate, frequency)
 		} else {
 			untilNextHeartbeat -= 1
 		}
@@ -253,13 +250,13 @@ func (b *Body) Run(frequency float64, realtime bool, verbose bool, sigs <-chan o
 		select {
 		case <-t.C:
 			if untilNextHeartbeat <= 0 {
-				b.Heart.Beat()
-				untilNextHeartbeat = heartRateFreq
+				heartRate = b.Heart.Beat()
+				untilNextHeartbeat = ticksUntilNextHeartbeat(heartRate, frequency)
 			} else {
 				untilNextHeartbeat -= 1
 			}
 
-			b.PrintStats(verbose)
+			b.PrintStats(heartRate, verbose)
 			b.Act()
 			i++
 
@@ -295,9 +292,11 @@ func (b *Body) Act() {
 	b.InferiorVenaCava.Act()
 }
 
-func (b *Body) PrintStats(verbose bool) {
+func (b *Body) PrintStats(heartRate float64, verbose bool) {
 	total := 0.0
 	fmt.Println("********************************")
+
+	fmt.Printf("Heart Rate: [%d]\n", int(heartRate))
 
 	heartStats := b.Heart.MonitorHeart()
 	for _, hs := range heartStats {
@@ -378,4 +377,8 @@ func (b *Body) SetMetabolicRate(m metabolism.MET) {
 	b.Abdomen.Muscle.SetMetabolicRate(m)
 	b.RightBreast.Muscle.SetMetabolicRate(m)
 	b.LeftBreast.Muscle.SetMetabolicRate(m)
+}
+
+func ticksUntilNextHeartbeat(heartRate float64, freq float64) float64 {
+	return (60.0 / heartRate) * freq
 }

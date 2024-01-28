@@ -49,3 +49,7 @@ func (b *Muscle) Act() {
 func (b *Muscle) BloodQuantity() float64 {
 	return b.vascularity.BloodQuantity()
 }
+
+func (b *Muscle) Norepinephrine() float64 {
+	return b.vascularity.Norepinephrine()
+}

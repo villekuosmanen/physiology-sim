@@ -31,7 +31,7 @@ func (m *MuscleMetaboliser) SetMetabolicRate(new MET) {
 func (m *MuscleMetaboliser) Metabolise(b *circulation.Blood) {
 	current := b.OxygenSaturation
 
-	powerDemand := (oxygenConsumptionRate * m.metabolicRate.Float64()) * 0.92 // acceptable scale factor
+	powerDemand := (oxygenConsumptionRate * m.metabolicRate.Float64()) * 0.94 // acceptable scale factor
 	aerobicProduction := oxygenConsumptionRate * m.metabolicRate.Float64() * current * current
 	if aerobicProduction >= powerDemand {
 		// aerobic production only

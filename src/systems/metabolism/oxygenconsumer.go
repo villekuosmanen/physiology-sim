@@ -12,13 +12,13 @@ type OxygenConsumer struct{}
 
 var _ Metaboliser = (*OxygenConsumer)(nil)
 
-const oxygenConsumptionRate = 0.0002
+const oxygenConsumptionRate = 0.00016
 
 // Metabolise implements Metaboliser.
 func (c *OxygenConsumer) Metabolise(b *circulation.Blood) {
 	current := b.OxygenSaturation
 
-	powerDemand := (oxygenConsumptionRate) * 0.92 // acceptable scale factor
+	powerDemand := (oxygenConsumptionRate) * 0.94 // acceptable scale factor
 	aerobicProduction := oxygenConsumptionRate * current * current
 	if aerobicProduction >= powerDemand {
 		// use what was required only

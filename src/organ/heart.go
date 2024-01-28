@@ -1,6 +1,8 @@
 package organ
 
 import (
+	"math"
+
 	"github.com/villekuosmanen/physiology-sim/src/simulation"
 	"github.com/villekuosmanen/physiology-sim/src/systems/circulation"
 )
@@ -8,6 +10,9 @@ import (
 type Heart struct {
 	// contains a muscle
 	Myocardium Muscle
+
+	// contains a pacemaker
+	pacemaker pacemaker
 
 	// contains two atria
 	// contains two ventricles
@@ -44,6 +49,7 @@ func ConstructHeart() *Heart {
 
 	return &Heart{
 		Myocardium:     *myocardium,
+		pacemaker:      pacemaker{},
 		RightAtrium:    rightAtrium,
 		LeftAtrium:     leftAtrium,
 		rightVentricle: rightVentricle,
@@ -71,7 +77,10 @@ type ventricle struct {
 	Artery circulation.BloodConsumer
 }
 
-func (h *Heart) Beat() {
+type pacemaker struct {
+}
+
+func (h *Heart) Beat() float64 {
 	// blood moves from atria to ventricles
 	br := h.RightAtrium.Blood.Extract(0.95)
 	h.rightVentricle.Blood.Merge(br)
@@ -85,6 +94,14 @@ func (h *Heart) Beat() {
 
 	blo := h.leftVentricle.Blood.Extract(0.95)
 	h.leftVentricle.Artery.AcceptBlood(blo)
+
+	// set new target heart rate based on myocardial blood vessel's neurotransmitters.
+	return h.pacemaker.targetHeartRate(h.Myocardium.Norepinephrine())
+}
+
+func (p *pacemaker) targetHeartRate(norepinephrine float64) float64 {
+	rest := 50.0
+	return rest + math.Floor(norepinephrine*130)
 }
 
 func (h *Heart) MonitorHeart() []*simulation.BloodStatistics {

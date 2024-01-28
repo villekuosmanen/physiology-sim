@@ -58,7 +58,7 @@ func (b *Blood) Merge(a Blood) {
 // Acidity returns a simplified metric of acidity of the blood.
 // It is calibrated at 0, with positive valus indicating acidity.
 func (b *Blood) Acidity() float64 {
-	oxygenFactor := (b.OxygenSaturation * -1) + 0.80
+	oxygenFactor := (b.OxygenSaturation * -1) + 0.90
 	lacticAcidFactor := b.LacticAcid
 
 	val := oxygenFactor + lacticAcidFactor
