@@ -17,7 +17,7 @@ var _ Metaboliser = (*LiverMetaboliser)(nil)
 func (c *LiverMetaboliser) Metabolise(b *circulation.Blood) {
 	current := b.OxygenSaturation
 
-	powerDemand := (oxygenConsumptionRate) * 0.92 // acceptable scale factor
+	powerDemand := (oxygenConsumptionRate) * 0.90 // acceptable scale factor
 	aerobicProduction := oxygenConsumptionRate * current * current
 	if aerobicProduction >= powerDemand {
 		// use what was required only

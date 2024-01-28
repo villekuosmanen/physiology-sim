@@ -12,8 +12,8 @@ type MuscleMetaboliser struct {
 	metabolicRate MET // MetabolicRate as measured in MET
 }
 
-const lacticAcidProductionRate = 1
-const lacticAcidBurnRate = 0.5 // less efficient to burn the acid
+const lacticAcidProductionRate = 2
+const lacticAcidBurnRate = 10
 
 var _ Metaboliser = (*OxygenConsumer)(nil)
 

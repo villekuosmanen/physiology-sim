@@ -37,6 +37,8 @@ type Body struct {
 	LeftArm  *organ.Limb
 	RightLeg *organ.Limb
 	LeftLeg  *organ.Limb
+
+	Effort metabolism.MET
 }
 
 func ConstructBody() *Body {
@@ -297,6 +299,7 @@ func (b *Body) PrintStats(heartRate float64, verbose bool) {
 	fmt.Println("********************************")
 
 	fmt.Printf("Heart Rate: [%d]\n", int(heartRate))
+	fmt.Printf("Effort: [%s]\n", b.Effort)
 
 	heartStats := b.Heart.MonitorHeart()
 	for _, hs := range heartStats {
@@ -380,22 +383,7 @@ func (b *Body) SetMetabolicRate(m metabolism.MET) {
 
 	// set the metabolic rate in the brain as well
 	b.Brain.SetMetabolicRate(m, b.SetMetabolicRate)
-}
-
-func (b *Body) SetMetabolicRateFromBrain(m metabolism.MET) {
-	// As decided by the artificial brain in control
-
-	b.LeftArm.Muscle.SetMetabolicRate(m)
-	b.RightArm.Muscle.SetMetabolicRate(m)
-	b.LeftLeg.Muscle.SetMetabolicRate(m)
-	b.RightArm.Muscle.SetMetabolicRate(m)
-
-	b.Abdomen.Muscle.SetMetabolicRate(m)
-	b.RightBreast.Muscle.SetMetabolicRate(m)
-	b.LeftBreast.Muscle.SetMetabolicRate(m)
-
-	// set the metabolic rate in the brain as well
-	b.Brain.SetMetabolicRate(m, b.SetMetabolicRate)
+	b.Effort = m
 }
 
 func ticksUntilNextHeartbeat(heartRate float64, freq float64) float64 {

@@ -1,9 +1,5 @@
 package circulation
 
-import (
-	"math"
-)
-
 type Blood struct {
 	// contains everything in a blood
 	Quantity         float64 // percentage (100 is max amount)
@@ -53,20 +49,6 @@ func (b *Blood) Merge(a Blood) {
 		b.LacticAcid = lactic
 		b.Norepinephrine = norepinephrine
 	}
-}
-
-// Acidity returns a simplified metric of acidity of the blood.
-// It is calibrated at 0, with positive valus indicating acidity.
-func (b *Blood) Acidity() float64 {
-	oxygenFactor := (b.OxygenSaturation * -1) + 0.90
-	lacticAcidFactor := b.LacticAcid
-
-	val := oxygenFactor + lacticAcidFactor
-	if val > 0 {
-		return math.Min(val, 1)
-	}
-
-	return math.Max(val, -1)
 }
 
 // RemoveFrom removes the given fraction's worth of blood from input.

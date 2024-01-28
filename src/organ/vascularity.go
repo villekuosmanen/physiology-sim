@@ -63,11 +63,11 @@ func (v *Vascularity) Process() circulation.Blood {
 
 		// set some of current blood into the next gate
 		norepinephrineEffect := 1.0
-		if v.snsSignalHandleMethod == nerve.SNSSignalHandleMethodExpand {
-			norepinephrineEffect = 1.5 - (0.75 * gate.blood.Norepinephrine)
-		} else if v.snsSignalHandleMethod == nerve.SNSSignalHandleMethodContract {
-			norepinephrineEffect = 0.75 + (gate.blood.Norepinephrine * 0.75)
-		}
+		// if v.snsSignalHandleMethod == nerve.SNSSignalHandleMethodExpand {
+		// 	norepinephrineEffect = 1.5 - (0.75 * gate.blood.Norepinephrine)
+		// } else if v.snsSignalHandleMethod == nerve.SNSSignalHandleMethodContract {
+		// 	norepinephrineEffect = 0.75 + (gate.blood.Norepinephrine * 0.75)
+		// }
 		temp = gate.blood.Extract(v.gateMovingRate * norepinephrineEffect)
 	}
 

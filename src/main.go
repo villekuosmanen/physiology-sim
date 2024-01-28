@@ -14,7 +14,7 @@ func main() {
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
 	body := body.ConstructBody()
-	body.SetMetabolicRate(metabolism.METExtremeCardio)
+	body.SetMetabolicRate(metabolism.METHeavyCardio)
 
-	body.Run(10, true, false, sigs)
+	body.Run(10, false, false, sigs)
 }

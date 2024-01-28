@@ -54,9 +54,9 @@ func (b *Brain) Act() {
 	bl = b.brainRegulator.Regulate(bl)
 
 	// change effort if needed
-	if bl.Norepinephrine > 0.95 && b.effort != metabolism.METLightCardio {
+	if bl.Norepinephrine > 0.95 && b.effort != metabolism.METSitting {
 		b.metabolicRateCallback(metabolism.METSitting)
-	} else if bl.Norepinephrine < 0.2 && b.effort != b.expectedEffort {
+	} else if bl.Norepinephrine < 0.4 && b.effort != b.expectedEffort {
 		b.metabolicRateCallback(b.expectedEffort)
 	}
 
