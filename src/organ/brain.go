@@ -9,9 +9,12 @@ import (
 
 type Brain struct {
 	// contains a reservoir for blood
-	vascularity    *Vascularity
-	brainRegulator *nerve.BrainRegulator
-	consumer       circulation.BloodConsumer
+	vascularity           *Vascularity
+	brainRegulator        *nerve.BrainRegulator
+	consumer              circulation.BloodConsumer
+	effort                metabolism.MET
+	expectedEffort        metabolism.MET
+	metabolicRateCallback func(metabolism.MET)
 }
 
 var _ circulation.BloodConsumer = (*Brain)(nil)
@@ -29,6 +32,15 @@ func ConstructBrain(consumer circulation.BloodConsumer) *Brain {
 	}
 }
 
+func (b *Brain) SetMetabolicRate(new metabolism.MET, metabolicRateCallback func(metabolism.MET)) {
+	if b.expectedEffort == 0 {
+		// initialise to original expected
+		b.expectedEffort = new
+		b.metabolicRateCallback = metabolicRateCallback
+	}
+	b.effort = new
+}
+
 // AcceptBlood implements circulation.BloodConsumer
 func (b *Brain) AcceptBlood(bl circulation.Blood) {
 	b.vascularity.AcceptBlood(bl)
@@ -40,6 +52,13 @@ func (b *Brain) Act() {
 
 	// Regulate neurotransmitters
 	bl = b.brainRegulator.Regulate(bl)
+
+	// change effort if needed
+	if bl.Norepinephrine > 0.95 && b.effort != metabolism.METLightCardio {
+		b.metabolicRateCallback(metabolism.METSitting)
+	} else if bl.Norepinephrine < 0.2 && b.effort != b.expectedEffort {
+		b.metabolicRateCallback(b.expectedEffort)
+	}
 
 	b.consumer.AcceptBlood(bl)
 }
