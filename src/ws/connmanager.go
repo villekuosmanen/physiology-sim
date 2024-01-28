@@ -23,7 +23,8 @@ type ConnectionManager struct {
 }
 
 type ClientMessage struct {
-	Message string `json:"message"`
+	Message string  `json:"message"`
+	Level   float64 `json:"level"`
 }
 
 func NewConnectionManager(simManager manager.BodySimManager) *ConnectionManager {
@@ -73,7 +74,9 @@ func (m *ConnectionManager) HandleConnections(w http.ResponseWriter, r *http.Req
 		}
 
 		if clientMessage.Message == "toggle_fast_forward" {
-			// TODO
+			m.simManager.ToggleFastForvard()
+		} else if clientMessage.Message == "set_exercise_level" {
+			m.simManager.SetExerciseLevel(clientMessage.Level)
 		} else if clientMessage.Message == "toggle_simulation" {
 			m.simManager.ResetSim(context.Background(), m)
 		}

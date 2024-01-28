@@ -44,8 +44,12 @@ function App() {
 
   const handleExerciseChange = (event) => {
     setExerciseLevel(event.target.value);
+    sendMessage(JSON.stringify({
+      message: 'set_exercise_level',
+      level: METValues[event.target.value],
+    }));
   };
-
+  
   const toggleFastForward = () => {
     sendMessage(JSON.stringify({
       message: 'toggle_fast_forward'
@@ -71,6 +75,15 @@ function App() {
     3: 5.5,
     4: 8,
     5: 10
+  };
+
+  const ReverseMETValues = {
+    0.66: "Rest",
+    1: 'Sitting down',
+    3: 'Light Cardio',
+    5.5: 'Medium Cardio',
+    8: 'Heavy Cardio',
+    10: 'Extreme Cardio',
   };
 
   return (
@@ -108,7 +121,7 @@ function App() {
       </div>
       <div className="right">
         <p>Current Heart Rate: {currentHeartRate} bpm</p>
-        <p>Current Effort (MET): {currentEffort}</p>
+        <p>Current Effort (MET): {ReverseMETValues[currentEffort]}</p>
         {hoveredElement && componentData[hoveredElement] ? <div>
           <div>{hoveredElement}</div>
           {componentData[hoveredElement].blood_quantity !== undefined

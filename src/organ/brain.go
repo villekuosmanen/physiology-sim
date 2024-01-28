@@ -35,9 +35,9 @@ func ConstructBrain(consumer circulation.BloodConsumer) *Brain {
 func (b *Brain) SetMetabolicRate(new metabolism.MET, metabolicRateCallback func(metabolism.MET)) {
 	if b.expectedEffort == 0 {
 		// initialise to original expected
-		b.expectedEffort = new
 		b.metabolicRateCallback = metabolicRateCallback
 	}
+	b.expectedEffort = new
 	b.effort = new
 }
 

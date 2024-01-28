@@ -9,6 +9,7 @@ import (
 
 type BodySimManager struct {
 	cancel context.CancelFunc
+	body   *body.Body
 }
 
 func (m *BodySimManager) ResetSim(signalCtx context.Context, connManager body.Broadcaster) {
@@ -20,8 +21,21 @@ func (m *BodySimManager) ResetSim(signalCtx context.Context, connManager body.Br
 	m.cancel = cancel
 
 	body := body.ConstructBody(connManager)
-	body.SetMetabolicRate(metabolism.METHeavyCardio)
+	body.SetMetabolicRate(metabolism.METRest)
+	m.body = body
 
 	// launch in a separate goroutine
-	go body.Run(ctx, 10, true, false)
+	go body.Run(ctx, false)
+}
+
+func (m *BodySimManager) SetExerciseLevel(level float64) {
+	if m.body != nil {
+		m.body.SetMetabolicRate(metabolism.MET(level))
+	}
+}
+
+func (m *BodySimManager) ToggleFastForvard() {
+	if m.body != nil {
+		m.body.ToggleFastForvard()
+	}
 }

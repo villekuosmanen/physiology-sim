@@ -41,7 +41,9 @@ type Body struct {
 	RightLeg *organ.Limb
 	LeftLeg  *organ.Limb
 
-	Effort metabolism.MET
+	Effort      metabolism.MET
+	FastForvard bool
+	TickerInUse *time.Ticker
 }
 
 type Broadcaster interface {
@@ -224,31 +226,25 @@ func ConstructBody(connManager Broadcaster) *Body {
 		LeftArm:          leftArm,
 		RightLeg:         rightLeg,
 		LeftLeg:          leftLeg,
+		FastForvard:      false,
+		TickerInUse:      time.NewTicker(time.Second / time.Duration(10)),
 	}
 }
 
-func (b *Body) Run(ctx context.Context, frequency float64, realtime bool, verbose bool) {
+func (b *Body) Run(ctx context.Context, verbose bool) {
 	// get heart rate in frequency
 	heartRate := 80.0
 
 	// run forever in given Hz
 	untilNextHeartbeat := 0.0
 
-	var t *time.Ticker
-	var i int64
-	if realtime {
-		t = time.NewTicker(time.Second / time.Duration(frequency))
-	} else {
-		// 100 times faster than otherwise
-		t = time.NewTicker(time.Second / (time.Duration(frequency) * 100))
-	}
-
+	var i int
 	// Before we start printing stats, converge by running 1,000,000 runs
 	fmt.Println("Starting simulation...")
 	for i := 0; i < 1_000_000; i++ {
 		if untilNextHeartbeat <= 0 {
 			heartRate = b.Heart.Beat()
-			untilNextHeartbeat = ticksUntilNextHeartbeat(heartRate, frequency)
+			untilNextHeartbeat = ticksUntilNextHeartbeat(heartRate)
 		} else {
 			untilNextHeartbeat -= 1
 		}
@@ -259,10 +255,10 @@ func (b *Body) Run(ctx context.Context, frequency float64, realtime bool, verbos
 
 	for {
 		select {
-		case <-t.C:
+		case <-b.TickerInUse.C:
 			if untilNextHeartbeat <= 0 {
 				heartRate = b.Heart.Beat()
-				untilNextHeartbeat = ticksUntilNextHeartbeat(heartRate, frequency)
+				untilNextHeartbeat = ticksUntilNextHeartbeat(heartRate)
 			} else {
 				untilNextHeartbeat -= 1
 			}
@@ -426,6 +422,15 @@ func (b *Body) SetMetabolicRate(m metabolism.MET) {
 	b.Effort = m
 }
 
-func ticksUntilNextHeartbeat(heartRate float64, freq float64) float64 {
-	return (60.0 / heartRate) * freq
+func (b *Body) ToggleFastForvard() {
+	if b.FastForvard {
+		b.TickerInUse = time.NewTicker(time.Second / time.Duration(10))
+	} else {
+		b.TickerInUse = time.NewTicker(time.Second / (time.Duration(10) * 100))
+	}
+	b.FastForvard = !b.FastForvard
+}
+
+func ticksUntilNextHeartbeat(heartRate float64) float64 {
+	return (60.0 / heartRate) * 10
 }

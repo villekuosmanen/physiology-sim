@@ -40,7 +40,7 @@ func (r *BrainRegulator) norepinephrineChange(bl circulation.Blood) float64 {
 	lacticDiff := (bl.LacticAcid - r.previousLacticAcid) / (bl.LacticAcid + r.previousLacticAcid)
 	oxyDiff := ((1 - bl.OxygenSaturation) - (1 - r.previousOxygenSaturation)) / ((1 - bl.OxygenSaturation) + (1 - r.previousOxygenSaturation))
 
-	if bl.LacticAcid < 0.05 && bl.OxygenSaturation > 0.90 {
+	if bl.LacticAcid < 0.05 && bl.OxygenSaturation > 0.92 {
 		return 0
 	}
 	return lacticDiff + oxyDiff
