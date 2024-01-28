@@ -3,15 +3,20 @@ package simulation
 import "fmt"
 
 type BloodStatistics struct {
-	ComponentName       string
-	BloodQuantity       float64
-	HasOxygenSaturation bool
-	OxygenSaturation    float64
-	HasLacticAcid       bool
-	LacticAcid          float64
-	HasNorepinephrine   bool
-	Norepinephrine      float64
-	Verbose             bool
+	ComponentName       string  `json:"component_name"`
+	BloodQuantity       float64 `json:"blood_quantity"`
+	HasOxygenSaturation bool    `json:"has_oxygen_saturation"`
+	OxygenSaturation    float64 `json:"oxygen_saturation"`
+	HasLacticAcid       bool    `json:"has_lactic_acid"`
+	LacticAcid          float64 `json:"lactic_acid"`
+	HasNorepinephrine   bool    `json:"has_norepinephrine"`
+	Norepinephrine      float64 `json:"norepinephrine"`
+	Verbose             bool    `json:"verbose"`
+}
+
+type GeneralStatistics struct {
+	HeartRate float64 `json:"heart_rate"`
+	Effort    float64 `json:"effort"`
 }
 
 // Print implements StatisticCarrier

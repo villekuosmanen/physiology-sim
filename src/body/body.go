@@ -6,11 +6,15 @@ import (
 	"time"
 
 	"github.com/villekuosmanen/physiology-sim/src/organ"
+	"github.com/villekuosmanen/physiology-sim/src/simulation"
 	"github.com/villekuosmanen/physiology-sim/src/systems/circulation"
 	"github.com/villekuosmanen/physiology-sim/src/systems/metabolism"
+	"github.com/villekuosmanen/physiology-sim/src/ws"
 )
 
 type Body struct {
+	connManager *ws.ConnectionManager
+
 	Heart            *organ.Heart
 	Aorta            *circulation.Vessel
 	SuperiorVenaCava *circulation.Vessel
@@ -41,7 +45,7 @@ type Body struct {
 	Effort metabolism.MET
 }
 
-func ConstructBody() *Body {
+func ConstructBody(connManager *ws.ConnectionManager) *Body {
 	// heart and veins
 	heart := organ.ConstructHeart()
 	superiorVenaCava := circulation.ConstructVessel(
@@ -197,6 +201,7 @@ func ConstructBody() *Body {
 	heart.SetConsumers(aorta, pulmonaryArtery)
 
 	return &Body{
+		connManager:      connManager,
 		Heart:            heart,
 		Aorta:            aorta,
 		SuperiorVenaCava: superiorVenaCava,
@@ -259,6 +264,7 @@ func (b *Body) Run(frequency float64, realtime bool, verbose bool, sigs <-chan o
 			}
 
 			b.PrintStats(heartRate, verbose)
+			b.BroadcastStats(heartRate)
 			b.Act()
 			i++
 
@@ -292,6 +298,36 @@ func (b *Body) Act() {
 
 	b.SuperiorVenaCava.Act()
 	b.InferiorVenaCava.Act()
+}
+
+func (b *Body) BroadcastStats(heartRate float64) {
+	heartStats := b.Heart.MonitorHeart()
+	for _, hs := range heartStats {
+		b.connManager.BroadcastBloodStats(*hs)
+	}
+
+	b.connManager.BroadcastBloodStats(*b.Aorta.Monitor())
+	b.connManager.BroadcastBloodStats(*b.Brain.Monitor())
+	b.connManager.BroadcastBloodStats(*b.Liver.Monitor())
+	b.connManager.BroadcastBloodStats(*b.LeftKidney.Monitor())
+	b.connManager.BroadcastBloodStats(*b.RightKidney.Monitor())
+	b.connManager.BroadcastBloodStats(*b.LeftBreast.Monitor())
+	b.connManager.BroadcastBloodStats(*b.RightBreast.Monitor())
+	b.connManager.BroadcastBloodStats(*b.Abdomen.Monitor())
+	b.connManager.BroadcastBloodStats(*b.RightArm.Monitor())
+	b.connManager.BroadcastBloodStats(*b.LeftArm.Monitor())
+	b.connManager.BroadcastBloodStats(*b.RightLeg.Monitor())
+	b.connManager.BroadcastBloodStats(*b.LeftLeg.Monitor())
+	b.connManager.BroadcastBloodStats(*b.PulmonaryArtery.Monitor())
+	b.connManager.BroadcastBloodStats(*b.Lungs.Monitor())
+	b.connManager.BroadcastBloodStats(*b.PulmonaryVein.Monitor())
+	b.connManager.BroadcastBloodStats(*b.SuperiorVenaCava.Monitor())
+	b.connManager.BroadcastBloodStats(*b.InferiorVenaCava.Monitor())
+
+	b.connManager.BroadcastGeneralStats(simulation.GeneralStatistics{
+		HeartRate: heartRate,
+		Effort:    b.Effort.Float64(),
+	})
 }
 
 func (b *Body) PrintStats(heartRate float64, verbose bool) {
