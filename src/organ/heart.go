@@ -102,18 +102,21 @@ func (h *Heart) MonitorHeart() []*simulation.BloodStatistics {
 		HasOxygenSaturation: true,
 		OxygenSaturation:    h.RightAtrium.Blood.OxygenSaturation,
 	})
-	// stats = append(stats, &simulation.BloodStatistics{
-	// 	ComponentName: "Heart (left ventricle)",
-	// 	BloodQuantity: h.leftVentricle.Blood.Quantity,
-	// })
-	// stats = append(stats, &simulation.BloodStatistics{
-	// 	ComponentName: "Heart (right ventricle)",
-	// 	BloodQuantity: h.rightVentricle.Blood.Quantity,
-	// })
-	// stats = append(stats, &simulation.BloodStatistics{
-	// 	ComponentName: "Heart (myocardium)",
-	// 	BloodQuantity: h.Myocardium.BloodQuantity(),
-	// })
+	stats = append(stats, &simulation.BloodStatistics{
+		ComponentName: "Heart (left ventricle)",
+		BloodQuantity: h.leftVentricle.Blood.Quantity,
+		Verbose:       true,
+	})
+	stats = append(stats, &simulation.BloodStatistics{
+		ComponentName: "Heart (right ventricle)",
+		BloodQuantity: h.rightVentricle.Blood.Quantity,
+		Verbose:       true,
+	})
+	stats = append(stats, &simulation.BloodStatistics{
+		ComponentName: "Heart (myocardium)",
+		BloodQuantity: h.Myocardium.BloodQuantity(),
+		Verbose:       true,
+	})
 
 	return stats
 }

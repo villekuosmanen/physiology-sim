@@ -4,6 +4,7 @@ import (
 	"github.com/villekuosmanen/physiology-sim/src/simulation"
 	"github.com/villekuosmanen/physiology-sim/src/systems/circulation"
 	"github.com/villekuosmanen/physiology-sim/src/systems/metabolism"
+	"github.com/villekuosmanen/physiology-sim/src/systems/nerve"
 )
 
 type Muscle struct {
@@ -20,8 +21,12 @@ func ConstructMuscle(consumer circulation.BloodConsumer) *Muscle {
 	metaboliser := metabolism.NewMuscleMetaboliser()
 	return &Muscle{
 		metaboliser: metaboliser,
-		vascularity: NewVascularity(VascularityRating4, metaboliser),
-		consumer:    consumer,
+		vascularity: NewVascularity(
+			VascularityRating4,
+			metaboliser,
+			nerve.SNSSignalHandleMethodExpand,
+		),
+		consumer: consumer,
 	}
 }
 

@@ -19,7 +19,11 @@ var _ simulation.MonitorableController = (*Brain)(nil)
 
 func ConstructBrain(consumer circulation.BloodConsumer) *Brain {
 	return &Brain{
-		vascularity:    NewVascularity(VascularityRating8, &metabolism.OxygenConsumer{}),
+		vascularity: NewVascularity(
+			VascularityRating8,
+			&metabolism.OxygenConsumer{},
+			nerve.SNSSignalHandleMethodNothing,
+		),
 		brainRegulator: &nerve.BrainRegulator{},
 		consumer:       consumer,
 	}

@@ -16,5 +16,5 @@ func main() {
 	body := body.ConstructBody()
 	body.SetMetabolicRate(metabolism.METLightCardio)
 
-	body.Run(10, true, sigs)
+	body.Run(10, true, false, sigs)
 }

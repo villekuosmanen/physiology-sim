@@ -16,5 +16,12 @@ func (r *BrainRegulator) Regulate(bl circulation.Blood) circulation.Blood {
 		bl.Norepinephrine += acidity * norepinephrineDeactivationRate
 	}
 
+	if bl.Norepinephrine < 0 {
+		// can not go negative
+		bl.Norepinephrine = 0
+	} else if bl.Norepinephrine > 1 {
+		bl.Norepinephrine = 1
+	}
+
 	return bl
 }

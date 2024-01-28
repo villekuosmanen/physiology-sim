@@ -4,6 +4,7 @@ import (
 	"github.com/villekuosmanen/physiology-sim/src/simulation"
 	"github.com/villekuosmanen/physiology-sim/src/systems/circulation"
 	"github.com/villekuosmanen/physiology-sim/src/systems/metabolism"
+	"github.com/villekuosmanen/physiology-sim/src/systems/nerve"
 )
 
 type Liver struct {
@@ -17,8 +18,12 @@ var _ simulation.MonitorableController = (*Liver)(nil)
 
 func ConstructLiver(consumer circulation.BloodConsumer) *Liver {
 	return &Liver{
-		vascularity: NewVascularity(VascularityRating8, &metabolism.OxygenConsumer{}),
-		consumer:    consumer,
+		vascularity: NewVascularity(
+			VascularityRating8,
+			&metabolism.LiverMetaboliser{},
+			nerve.SNSSignalHandleMethodContract,
+		),
+		consumer: consumer,
 	}
 }
 

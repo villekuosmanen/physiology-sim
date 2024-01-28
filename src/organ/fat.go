@@ -4,6 +4,7 @@ import (
 	"github.com/villekuosmanen/physiology-sim/src/simulation"
 	"github.com/villekuosmanen/physiology-sim/src/systems/circulation"
 	"github.com/villekuosmanen/physiology-sim/src/systems/metabolism"
+	"github.com/villekuosmanen/physiology-sim/src/systems/nerve"
 )
 
 type Fat struct {
@@ -17,8 +18,12 @@ var _ simulation.Controller = (*Fat)(nil)
 
 func ConstructFat(consumer circulation.BloodConsumer) *Fat {
 	return &Fat{
-		vascularity: NewVascularity(VascularityRating1, &metabolism.OxygenConsumer{}),
-		consumer:    consumer,
+		vascularity: NewVascularity(
+			VascularityRating1,
+			&metabolism.OxygenConsumer{},
+			nerve.SNSSignalHandleMethodContract,
+		),
+		consumer: consumer,
 	}
 }
 

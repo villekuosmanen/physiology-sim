@@ -219,7 +219,7 @@ func ConstructBody() *Body {
 	}
 }
 
-func (b *Body) Run(frequency float64, realtime bool, sigs <-chan os.Signal) {
+func (b *Body) Run(frequency float64, realtime bool, verbose bool, sigs <-chan os.Signal) {
 	// get heart rate in frequency
 	heartRateFreq := (heartRate / 60) * frequency
 
@@ -259,7 +259,7 @@ func (b *Body) Run(frequency float64, realtime bool, sigs <-chan os.Signal) {
 				untilNextHeartbeat -= 1
 			}
 
-			b.PrintStats()
+			b.PrintStats(verbose)
 			b.Act()
 			i++
 
@@ -295,71 +295,71 @@ func (b *Body) Act() {
 	b.InferiorVenaCava.Act()
 }
 
-func (b *Body) PrintStats() {
+func (b *Body) PrintStats(verbose bool) {
 	total := 0.0
 	fmt.Println("********************************")
 
 	heartStats := b.Heart.MonitorHeart()
 	for _, hs := range heartStats {
 		total += hs.BloodQuantity
-		hs.Print()
+		hs.Print(verbose)
 	}
 	s := b.Aorta.Monitor()
 	total += s.BloodQuantity
-	s.Print()
+	s.Print(verbose)
 
 	s = b.Brain.Monitor()
 	total += s.BloodQuantity
-	s.Print()
+	s.Print(verbose)
 	s = b.Liver.Monitor()
 	total += s.BloodQuantity
-	s.Print()
+	s.Print(verbose)
 	s = b.LeftKidney.Monitor()
 	total += s.BloodQuantity
-	s.Print()
+	s.Print(verbose)
 	s = b.RightKidney.Monitor()
 	total += s.BloodQuantity
-	s.Print()
+	s.Print(verbose)
 
 	s = b.LeftBreast.Monitor()
 	total += s.BloodQuantity
-	s.Print()
+	s.Print(verbose)
 	s = b.RightBreast.Monitor()
 	total += s.BloodQuantity
-	s.Print()
+	s.Print(verbose)
 	s = b.Abdomen.Monitor()
 	total += s.BloodQuantity
-	s.Print()
+	s.Print(verbose)
 
 	s = b.RightArm.Monitor()
 	total += s.BloodQuantity
-	s.Print()
+	s.Print(verbose)
 	s = b.LeftArm.Monitor()
 	total += s.BloodQuantity
-	s.Print()
+	s.Print(verbose)
 	s = b.RightLeg.Monitor()
 	total += s.BloodQuantity
-	s.Print()
+	s.Print(verbose)
 	s = b.LeftLeg.Monitor()
 	total += s.BloodQuantity
-	s.Print()
+	s.Print(verbose)
 
 	s = b.PulmonaryArtery.Monitor()
 	total += s.BloodQuantity
-	s.Print()
+	s.Print(verbose)
 	s = b.Lungs.Monitor()
 	total += s.BloodQuantity
-	s.Print()
+	s.Print(verbose)
 	s = b.PulmonaryVein.Monitor()
 	total += s.BloodQuantity
-	s.Print()
+	s.Print(verbose)
 
 	s = b.SuperiorVenaCava.Monitor()
 	total += s.BloodQuantity
-	s.Print()
+	s.Print(verbose)
 	s = b.InferiorVenaCava.Monitor()
 	total += s.BloodQuantity
-	s.Print()
+	s.Print(verbose)
 
 	fmt.Printf("****** TOTAL: %.2f *********\n", total)
 	fmt.Println("********************************")

@@ -3,12 +3,14 @@ package organ
 import (
 	"github.com/villekuosmanen/physiology-sim/src/systems/circulation"
 	"github.com/villekuosmanen/physiology-sim/src/systems/metabolism"
+	"github.com/villekuosmanen/physiology-sim/src/systems/nerve"
 )
 
 type Vascularity struct {
-	Gates          []*OrganGate
-	Metaboliser    metabolism.Metaboliser
-	gateMovingRate float64
+	Gates                 []*OrganGate
+	Metaboliser           metabolism.Metaboliser
+	gateMovingRate        float64
+	snsSignalHandleMethod nerve.SNSSignalHandleMethod
 }
 
 type OrganGate struct {
@@ -26,7 +28,11 @@ const (
 	VascularityRating1  = 1
 )
 
-func NewVascularity(numberOfGates int, metaboliser metabolism.Metaboliser) *Vascularity {
+func NewVascularity(
+	numberOfGates int,
+	metaboliser metabolism.Metaboliser,
+	snsSignalHandleMethod nerve.SNSSignalHandleMethod,
+) *Vascularity {
 	gates := []*OrganGate{}
 	for i := 0; i < numberOfGates; i++ {
 		gates = append(gates, &OrganGate{
@@ -34,9 +40,10 @@ func NewVascularity(numberOfGates int, metaboliser metabolism.Metaboliser) *Vasc
 		})
 	}
 	return &Vascularity{
-		Gates:          gates,
-		Metaboliser:    metaboliser,
-		gateMovingRate: circulation.EmptyRateVascularity,
+		Gates:                 gates,
+		Metaboliser:           metaboliser,
+		gateMovingRate:        circulation.EmptyRateVascularity,
+		snsSignalHandleMethod: snsSignalHandleMethod,
 	}
 }
 
@@ -55,7 +62,13 @@ func (v *Vascularity) Process() circulation.Blood {
 		v.Metaboliser.Metabolise(gate.blood)
 
 		// set some of current blood into the next gate
-		temp = gate.blood.Extract(v.gateMovingRate)
+		norepinephrineEffect := 1.0
+		if v.snsSignalHandleMethod == nerve.SNSSignalHandleMethodExpand {
+			norepinephrineEffect = 1.5 - (0.75 * gate.blood.Norepinephrine)
+		} else if v.snsSignalHandleMethod == nerve.SNSSignalHandleMethodContract {
+			norepinephrineEffect = 0.75 + (gate.blood.Norepinephrine * 0.75)
+		}
+		temp = gate.blood.Extract(v.gateMovingRate * norepinephrineEffect)
 	}
 
 	return temp

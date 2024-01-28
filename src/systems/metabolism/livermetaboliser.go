@@ -6,16 +6,15 @@ import (
 	"github.com/villekuosmanen/physiology-sim/src/systems/circulation"
 )
 
-// OxygenConsumer is a simple oxygen consumer.
+// LiverMetaboliser is a metaboliser for the liver.
 // It is only capable of metabolism under aerobic conditions.
-type OxygenConsumer struct{}
+// It can also metabolise lactic acid.
+type LiverMetaboliser struct{}
 
-var _ Metaboliser = (*OxygenConsumer)(nil)
-
-const oxygenConsumptionRate = 0.0002
+var _ Metaboliser = (*LiverMetaboliser)(nil)
 
 // Metabolise implements Metaboliser.
-func (c *OxygenConsumer) Metabolise(b *circulation.Blood) {
+func (c *LiverMetaboliser) Metabolise(b *circulation.Blood) {
 	current := b.OxygenSaturation
 
 	powerDemand := (oxygenConsumptionRate) * 0.92 // acceptable scale factor
@@ -23,6 +22,14 @@ func (c *OxygenConsumer) Metabolise(b *circulation.Blood) {
 	if aerobicProduction >= powerDemand {
 		// use what was required only
 		b.OxygenSaturation = current - powerDemand
+
+		// burn lactic acid - liver is more efficient than muscles
+		excess := aerobicProduction - powerDemand
+		b.LacticAcid -= (excess * lacticAcidBurnRate * 4)
+		if b.LacticAcid < 0 {
+			// ensure it doesn't go below zero
+			b.LacticAcid = 0
+		}
 		return
 	}
 

@@ -50,10 +50,13 @@ func ConstructVessel(
 // Act implements simulation.Controller
 func (v *Vessel) Act() {
 	// At each tick, a share of the blood avaiable in the artery is sent to its outflows
-	// TODO: this is unrealistic.
-	// Each of the consumers needs to order a specific share of blood being consumed from the vessel.
-	// This ensures bigger organs receive more blood than smaller ones.
-	allBlood := v.blood.Extract(v.emptyRate)
+	// This represents how fast blood circulates in the vessels.
+	// Autonomous nervous system affects it through neurotransmitters.
+
+	norepinephrineEffect := 0.75 + (v.blood.Norepinephrine * 0.75)
+	effectiveEmptyRate := v.emptyRate * norepinephrineEffect
+
+	allBlood := v.blood.Extract(effectiveEmptyRate)
 	totalWeight := 0.0
 	for _, consumer := range v.consumers {
 		totalWeight += consumer.BloodSupply

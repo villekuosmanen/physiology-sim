@@ -1,6 +1,10 @@
 package metabolism
 
-import "github.com/villekuosmanen/physiology-sim/src/systems/circulation"
+import (
+	"math"
+
+	"github.com/villekuosmanen/physiology-sim/src/systems/circulation"
+)
 
 // MuscleMetaboliser is a metaboliser that prefers aerobic metabolism,
 // but it can also metabolise anaerobically, producing lactic acid in the process.
@@ -44,6 +48,8 @@ func (m *MuscleMetaboliser) Metabolise(b *circulation.Blood) {
 	}
 
 	// required power will have to be produced anaerobically
-	b.OxygenSaturation = current - aerobicProduction
+	if !math.IsNaN(aerobicProduction) {
+		b.OxygenSaturation = current - aerobicProduction
+	}
 	b.LacticAcid += (powerDemand - aerobicProduction) * lacticAcidProductionRate
 }

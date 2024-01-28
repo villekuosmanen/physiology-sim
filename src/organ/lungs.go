@@ -4,6 +4,7 @@ import (
 	"github.com/villekuosmanen/physiology-sim/src/simulation"
 	"github.com/villekuosmanen/physiology-sim/src/systems/circulation"
 	"github.com/villekuosmanen/physiology-sim/src/systems/metabolism"
+	"github.com/villekuosmanen/physiology-sim/src/systems/nerve"
 )
 
 type Lungs struct {
@@ -19,9 +20,8 @@ func ConstructLungs(consumer circulation.BloodConsumer) *Lungs {
 	return &Lungs{
 		vascularity: NewVascularity(
 			VascularityRating3,
-			&metabolism.OxygenProducer{
-				RateFactor: 0.02,
-			},
+			metabolism.NewLungMetaboliser(),
+			nerve.SNSSignalHandleMethodNothing,
 		),
 		consumer: consumer,
 	}
