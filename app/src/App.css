@@ -22,6 +22,11 @@
   width: 30vw;
 }
 
+.fast-forward {
+  display: flex;
+  flex-direction: row;
+}
+
 .centre {
   width: 40vw;
   height: 100vh;

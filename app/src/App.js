@@ -3,15 +3,54 @@ import './App.css';
 
 function App() {
   const [hoveredElement, setHoveredElement] = useState('');
+  const [exerciseLevel, setExerciseLevel] = useState(0); // 0 can be the default value
+  const [isFastForward, setIsFastForward] = useState(false);
+  const [isSimulationRunning, setIsSimulationRunning] = useState(false);
+  const [currentHeartRate, setCurrentHeartRate] = useState(70); // Default heart rate, for example
+  const [currentEffort, setCurrentEffort] = useState(1); // Default effort, for example
+
+
+  const handleExerciseChange = (event) => {
+    setExerciseLevel(event.target.value);
+  };
+
+  const toggleFastForward = () => {
+    setIsFastForward(!isFastForward);
+  };
+
+  const toggleSimulation = () => {
+    setIsSimulationRunning(!isSimulationRunning);
+  };
+
 
   function handleMouseEnter(e) {
     setHoveredElement(e.target.id);
   }
 
+  const METValues = {
+    0: 0.66,
+    1: 1,
+    2: 3,
+    3: 5.5,
+    4: 8,
+    5: 10
+  };
+
   return (
     <div className="App-header">
       <div className="left">
-        <p>test</p>
+        <p>Exercise level</p>
+        <input type="range" min="0" max="5" value={exerciseLevel} onChange={handleExerciseChange} />
+        {['Rest', 'Sitting down', 'Light Cardio', 'Medium Cardio', 'Heavy Cardio', 'Extreme Cardio'][exerciseLevel]}
+
+        <div className='fast-forward'>
+          <p>Fast Forward</p>
+          <input type="checkbox" checked={isFastForward} onChange={toggleFastForward} />
+        </div>
+
+        <button onClick={toggleSimulation}>
+          {isSimulationRunning ? 'Stop Simulation' : 'Start Simulation'}
+        </button>
       </div>
       <div className="centre">
         <svg viewBox="100 0 400 500" xmlns="http://www.w3.org/2000/svg">
@@ -33,6 +72,8 @@ function App() {
         </svg>
       </div>
       <div className="right">
+        <p>Current Heart Rate: {currentHeartRate} bpm</p>
+        <p>Current Effort (MET): {currentEffort}</p>
         <p>{hoveredElement ? `Hovering over: ${hoveredElement}` : 'Hover over a body part'}</p>
       </div>
     </div>
