@@ -107,32 +107,15 @@ func (p *pacemaker) targetHeartRate(norepinephrine float64) float64 {
 func (h *Heart) MonitorHeart() []*simulation.BloodStatistics {
 	stats := []*simulation.BloodStatistics{}
 
+	totalQty := h.LeftAtrium.Blood.Quantity +
+		h.RightAtrium.Blood.Quantity +
+		h.leftVentricle.Blood.Quantity +
+		h.rightVentricle.Blood.Quantity +
+		h.Myocardium.BloodQuantity()
+
 	stats = append(stats, &simulation.BloodStatistics{
-		ComponentName:       "Heart (left atrium)",
-		BloodQuantity:       h.LeftAtrium.Blood.Quantity,
-		HasOxygenSaturation: true,
-		OxygenSaturation:    h.LeftAtrium.Blood.OxygenSaturation,
-	})
-	stats = append(stats, &simulation.BloodStatistics{
-		ComponentName:       "Heart (right atrium)",
-		BloodQuantity:       h.RightAtrium.Blood.Quantity,
-		HasOxygenSaturation: true,
-		OxygenSaturation:    h.RightAtrium.Blood.OxygenSaturation,
-	})
-	stats = append(stats, &simulation.BloodStatistics{
-		ComponentName: "Heart (left ventricle)",
-		BloodQuantity: h.leftVentricle.Blood.Quantity,
-		Verbose:       true,
-	})
-	stats = append(stats, &simulation.BloodStatistics{
-		ComponentName: "Heart (right ventricle)",
-		BloodQuantity: h.rightVentricle.Blood.Quantity,
-		Verbose:       true,
-	})
-	stats = append(stats, &simulation.BloodStatistics{
-		ComponentName: "Heart (myocardium)",
-		BloodQuantity: h.Myocardium.BloodQuantity(),
-		Verbose:       true,
+		ComponentName: "heart",
+		BloodQuantity: totalQty,
 	})
 
 	return stats

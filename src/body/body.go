@@ -1,19 +1,18 @@
 package body
 
 import (
+	"context"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/villekuosmanen/physiology-sim/src/organ"
 	"github.com/villekuosmanen/physiology-sim/src/simulation"
 	"github.com/villekuosmanen/physiology-sim/src/systems/circulation"
 	"github.com/villekuosmanen/physiology-sim/src/systems/metabolism"
-	"github.com/villekuosmanen/physiology-sim/src/ws"
 )
 
 type Body struct {
-	connManager *ws.ConnectionManager
+	connManager Broadcaster
 
 	Heart            *organ.Heart
 	Aorta            *circulation.Vessel
@@ -45,7 +44,12 @@ type Body struct {
 	Effort metabolism.MET
 }
 
-func ConstructBody(connManager *ws.ConnectionManager) *Body {
+type Broadcaster interface {
+	BroadcastBloodStats(s simulation.BloodStatistics)
+	BroadcastGeneralStats(s simulation.GeneralStatistics)
+}
+
+func ConstructBody(connManager Broadcaster) *Body {
 	// heart and veins
 	heart := organ.ConstructHeart()
 	superiorVenaCava := circulation.ConstructVessel(
@@ -74,43 +78,43 @@ func ConstructBody(connManager *ws.ConnectionManager) *Body {
 	// major organs
 	brain := organ.ConstructBrain(superiorVenaCava)
 	liver := organ.ConstructLiver(inferiorVenaCava)
-	leftKidney := organ.ConstructKidney("Left Kidney", inferiorVenaCava)
-	rightKidney := organ.ConstructKidney("Right Kidney", inferiorVenaCava)
+	leftKidney := organ.ConstructKidney("left-kidney", inferiorVenaCava)
+	rightKidney := organ.ConstructKidney("right-kidney", inferiorVenaCava)
 
 	// limbs and torso
 	leftBreast := organ.ConstructTorsoPart(
-		"Left Breast",
+		"left-breast",
 		0.7,
 		superiorVenaCava,
 	)
 	rightBreast := organ.ConstructTorsoPart(
-		"Right Breast",
+		"right-breast",
 		0.7,
 		superiorVenaCava,
 	)
 	abdomen := organ.ConstructTorsoPart(
-		"Abdomen",
+		"abdomen",
 		0.5,
 		inferiorVenaCava,
 	)
 
 	rightArm := organ.ConstructLimb(
-		"Right Arm",
+		"right-arm",
 		0.8,
 		superiorVenaCava,
 	)
 	leftArm := organ.ConstructLimb(
-		"Left Arm",
+		"left-arm",
 		0.8,
 		superiorVenaCava,
 	)
 	rightLeg := organ.ConstructLimb(
-		"Right Leg",
+		"right-leg",
 		0.8,
 		inferiorVenaCava,
 	)
 	leftLeg := organ.ConstructLimb(
-		"Left Leg",
+		"left-leg",
 		0.8,
 		inferiorVenaCava,
 	)
@@ -223,7 +227,7 @@ func ConstructBody(connManager *ws.ConnectionManager) *Body {
 	}
 }
 
-func (b *Body) Run(frequency float64, realtime bool, verbose bool, sigs <-chan os.Signal) {
+func (b *Body) Run(ctx context.Context, frequency float64, realtime bool, verbose bool) {
 	// get heart rate in frequency
 	heartRate := 80.0
 
@@ -268,7 +272,7 @@ func (b *Body) Run(frequency float64, realtime bool, verbose bool, sigs <-chan o
 			b.Act()
 			i++
 
-		case <-sigs:
+		case <-ctx.Done():
 			return
 		}
 	}

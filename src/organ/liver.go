@@ -42,7 +42,7 @@ func (b *Liver) Act() {
 // Monitor implements simulation.Controller
 func (b *Liver) Monitor() *simulation.BloodStatistics {
 	return &simulation.BloodStatistics{
-		ComponentName: "Liver",
+		ComponentName: "liver",
 		BloodQuantity: b.vascularity.BloodQuantity(),
 	}
 }

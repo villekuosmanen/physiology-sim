@@ -1,12 +1,14 @@
 package ws
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"sync"
 
 	"github.com/gorilla/websocket"
+	"github.com/villekuosmanen/physiology-sim/src/manager"
 	"github.com/villekuosmanen/physiology-sim/src/simulation"
 )
 
@@ -16,9 +18,15 @@ type ConnectionManager struct {
 	generalStats chan simulation.GeneralStatistics
 	mutex        sync.RWMutex
 	upgrader     websocket.Upgrader
+
+	simManager manager.BodySimManager
 }
 
-func NewConnectionManager() *ConnectionManager {
+type ClientMessage struct {
+	Message string `json:"message"`
+}
+
+func NewConnectionManager(simManager manager.BodySimManager) *ConnectionManager {
 	return &ConnectionManager{
 		clients:      make(map[*websocket.Conn]bool),
 		bloodStats:   make(chan simulation.BloodStatistics),
@@ -28,6 +36,7 @@ func NewConnectionManager() *ConnectionManager {
 				return true // For development purposes only
 			},
 		},
+		simManager: simManager,
 	}
 }
 
@@ -52,10 +61,21 @@ func (m *ConnectionManager) HandleConnections(w http.ResponseWriter, r *http.Req
 	for {
 		// Read (and ignore) messages from the WebSocket
 		// TODO process these messages
-		_, _, err := ws.ReadMessage()
+		_, body, err := ws.ReadMessage()
 		if err != nil {
 			// error, return
 			break
+		}
+		clientMessage := ClientMessage{}
+		err = json.Unmarshal(body, &clientMessage)
+		if err != nil {
+			continue
+		}
+
+		if clientMessage.Message == "toggle_fast_forward" {
+			// TODO
+		} else if clientMessage.Message == "toggle_simulation" {
+			m.simManager.ResetSim(context.Background(), m)
 		}
 	}
 }

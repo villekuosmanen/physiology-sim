@@ -66,7 +66,7 @@ func (b *Brain) Act() {
 // Monitor implements simulation.Controller
 func (b *Brain) Monitor() *simulation.BloodStatistics {
 	return &simulation.BloodStatistics{
-		ComponentName:       "Brain",
+		ComponentName:       "brain",
 		BloodQuantity:       b.vascularity.BloodQuantity(),
 		HasOxygenSaturation: true,
 		OxygenSaturation:    b.vascularity.OxygenSaturation(),

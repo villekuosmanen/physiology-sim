@@ -42,7 +42,9 @@ func (b *Lungs) Act() {
 // Monitor implements simulation.Controller
 func (b *Lungs) Monitor() *simulation.BloodStatistics {
 	return &simulation.BloodStatistics{
-		ComponentName: "Lungs",
-		BloodQuantity: b.vascularity.BloodQuantity(),
+		ComponentName:       "lungs",
+		BloodQuantity:       b.vascularity.BloodQuantity(),
+		HasOxygenSaturation: true,
+		OxygenSaturation:    b.vascularity.OxygenSaturation(),
 	}
 }

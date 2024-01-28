@@ -1,13 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import useWebSocket, { ReadyState } from 'react-use-websocket';
 import './App.css';
 
 function App() {
+  const [socketUrl] = useState('ws://localhost:7766/ws'); // Update with your WebSocket server URL
+
   const [hoveredElement, setHoveredElement] = useState('');
   const [exerciseLevel, setExerciseLevel] = useState(0); // 0 can be the default value
   const [isFastForward, setIsFastForward] = useState(false);
-  const [isSimulationRunning, setIsSimulationRunning] = useState(false);
   const [currentHeartRate, setCurrentHeartRate] = useState(70); // Default heart rate, for example
   const [currentEffort, setCurrentEffort] = useState(1); // Default effort, for example
+  const [componentData, setComponentData] = useState({});
+
+  const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl, {
+    onOpen: () => {
+      console.log('WebSocket Connected');
+    }
+  });
+
+  useEffect(() => {
+    if (lastMessage !== null) {
+      console.log(lastMessage.data)
+      const messageData = JSON.parse(lastMessage.data);
+      if (messageData.component_name !== undefined) {
+        setComponentData(prevData => ({
+          ...prevData,
+          [messageData.component_name]: messageData
+        }));
+
+      } else {
+        // general stat
+        if (messageData.heart_rate !== undefined) {
+          setCurrentHeartRate(messageData.heart_rate)
+        }
+        if (messageData.effort !== undefined) {
+          setCurrentEffort(messageData.effort)
+        }
+      }
+    }
+  }, [lastMessage]);
+
 
 
   const handleExerciseChange = (event) => {
@@ -15,11 +47,16 @@ function App() {
   };
 
   const toggleFastForward = () => {
+    sendMessage(JSON.stringify({
+      message: 'toggle_fast_forward'
+    }));
     setIsFastForward(!isFastForward);
   };
 
   const toggleSimulation = () => {
-    setIsSimulationRunning(!isSimulationRunning);
+    sendMessage(JSON.stringify({
+      message: 'toggle_simulation'
+    }));
   };
 
 
@@ -48,9 +85,7 @@ function App() {
           <input type="checkbox" checked={isFastForward} onChange={toggleFastForward} />
         </div>
 
-        <button onClick={toggleSimulation}>
-          {isSimulationRunning ? 'Stop Simulation' : 'Start Simulation'}
-        </button>
+        <button onClick={toggleSimulation}>Reset simulation</button>
       </div>
       <div className="centre">
         <svg viewBox="100 0 400 500" xmlns="http://www.w3.org/2000/svg">
@@ -74,7 +109,29 @@ function App() {
       <div className="right">
         <p>Current Heart Rate: {currentHeartRate} bpm</p>
         <p>Current Effort (MET): {currentEffort}</p>
-        <p>{hoveredElement ? `Hovering over: ${hoveredElement}` : 'Hover over a body part'}</p>
+        {hoveredElement && componentData[hoveredElement] ? <div>
+          <div>{hoveredElement}</div>
+          {componentData[hoveredElement].blood_quantity !== undefined
+            ? <div>
+              Blood quantity: {(componentData[hoveredElement].blood_quantity).toFixed(2)}
+            </div>
+            : null}
+          {componentData[hoveredElement].has_oxygen_saturation 
+            ? <div>
+              Blood oxygen: {(componentData[hoveredElement].oxygen_saturation * 100).toFixed(2)}%
+            </div>
+            : null}
+          {componentData[hoveredElement].has_lactic_acid 
+            ? <div>
+              Lactic Acid: {(componentData[hoveredElement].lactic_acid * 100).toFixed(2)}
+            </div>
+            : null}
+          {componentData[hoveredElement].has_norepinephrine 
+            ? <div>
+              Norepinephrine: {(componentData[hoveredElement].norepinephrine * 100).toFixed(2)}%
+            </div>
+            : null}
+        </div> : null}
       </div>
     </div>
   );
